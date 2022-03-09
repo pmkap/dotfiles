@@ -1,0 +1,65 @@
+# general
+export PATH=$HOME/.local/bin:$HOME/.local/bin/AppImages:$HOME/go/bin:$PATH
+export HOSTNAME="$(cat /etc/hostname)"
+
+# keyboard
+export XKB_DEFAULT_LAYOUT=eu
+export XKB_DEFAULT_OPTIONS=caps:swapescape
+
+# default apps
+export VISUAL=nvim
+export EDITOR=nvim
+export BROWSER=librewolf
+export TERMINAL=foot
+
+# xdg base directory
+export XDG_CONFIG_HOME=$HOME/.config
+export XDG_CACHE_HOME=$HOME/.cache
+export XDG_DATA_HOME=$HOME/.local/share
+export XDG_STATE_HOME=$HOME/.local/state
+
+# npm
+export NPM_CONFIG_USERCONFIG=$XDG_CONFIG_HOME/npm/npmrc
+
+# haskell stack
+export STACK_ROOT=$HOME/.local/share/stack
+
+# firefox
+export MOZ_ENABLE_WAYLAND=1
+
+# ipython
+export IPYTHONDIR=$HOME/.local/share/ipython
+
+# cargo
+export CARGO_HOME=$HOME/.cache/cargo
+
+# gpg
+export GNUPGHOME=$HOME/.config/gpg
+
+# less
+export LESSHISTFILE=$HOME/.local/share/less/lesshst
+
+# fff
+export FFF_TRASH_CMD=trash-put
+export FFF_TRASH=$HOME/.local/share/Trash/files
+
+# bemenu
+export BEMENU_OPTS="
+    -H 23 \
+    --fn 'JetBrainsMono Nerd Font' \
+    --tb #000000 \
+    --tf #ffffff \
+    --fb #000000 \
+    --ff #ffffff \
+    --nb #000000 \
+    --nf #ffffff \
+    --hb #000000 \
+    --hf #63d1f4 \
+    --scb #000000 \
+    --scf #ffffff \
+"
+
+# start compositor
+if [ "$(tty)" = "/dev/tty1" ]; then
+    XDG_CURRENT_DESKTOP=river river
+fi

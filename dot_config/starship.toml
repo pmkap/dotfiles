@@ -1,0 +1,31 @@
+# https://starship.rs/config/
+add_newline = true
+ 
+[line_break]
+disabled = true
+ 
+[username]
+format = "[$user]($style)"
+ 
+[hostname]
+format = "[@$hostname]($style)"
+ 
+[localip]
+disabled = true
+ 
+[directory]
+format = " [$path]($style)[$read_only]($read_only_style) "
+
+[python]
+format = '[${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+
+[aws]
+disabled = true
+[package]
+disabled = true
+[zig]
+disabled = true
+[nodejs]
+disabled = true
+[java]
+disabled = true

@@ -1,0 +1,70 @@
+# mode
+bindkey -e
+
+# override silly defaults
+bindkey "^U" backward-kill-line
+
+# completion
+autoload -Uz compinit promptinit
+compinit -d $HOME/.local/share/zsh/zcompdump
+promptinit
+setopt COMPLETE_ALIASES
+zstyle ':completion:*' menu select
+zstyle ':completion:*'  matcher-list 'm:{a-z}={A-Z}'
+
+# history
+HISTFILE=$HOME/.local/share/zsh/zsh_history
+HISTSIZE=100000000
+SAVEHIST=100000000
+setopt INC_APPEND_HISTORY
+setopt HIST_IGNORE_SPACE
+setopt EXTENDED_HISTORY
+
+# history search
+autoload -U history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+bindkey "^[[A" history-beginning-search-backward-end
+bindkey "^[[B" history-beginning-search-forward-end
+bindkey "^P" history-beginning-search-backward-end
+bindkey "^N" history-beginning-search-forward-end
+
+# fix keys
+bindkey "^[[3~" delete-char
+
+# aliases
+alias ls="ls --color=auto"
+alias ll="ls -l"
+alias la="ls -A"
+alias lla="ls -lA"
+alias vim="nvim"
+alias vi="nvim"
+alias sudo="sudo "
+alias rm="echo -E 'Disabled! Use trash(1) or \rm.'; false"
+alias mv="mv -i"
+alias cp="cp -i"
+alias tar="bsdtar"
+alias lsblkk="lsblk -o NAME,RM,RO,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS"
+alias wget="wget --hsts-file=$HOME/.local/share/wget/wget-hsts"
+
+### OSC 7 sequence ###
+# https://codeberg.org/dnkl/foot/wiki#how-to-configure-my-shell-to-emit-the-osc-7-escape-sequence
+_urlencode() {
+	local length="${#1}"
+	for (( i = 0; i < length; i++ )); do
+		local c="${1:$i:1}"
+		case $c in
+			%) printf '%%%02X' "'$c" ;;
+			*) printf "%s" "$c" ;;
+		esac
+	done
+}
+osc7_cwd() {
+	printf '\e]7;file://%s%s\e\\' "$HOSTNAME" "$(_urlencode "$PWD")"
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook -Uz chpwd osc7_cwd
+###
+
+# prompt
+eval "$(starship init zsh)"

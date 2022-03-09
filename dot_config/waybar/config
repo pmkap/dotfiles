@@ -1,0 +1,79 @@
+{
+  "modules-left": [
+    "river/tags"
+  ],
+
+  "modules-right": [
+    "network",
+    "cpu",
+    "memory",
+    "battery",
+    "pulseaudio",
+    "clock",
+    "tray"
+  ],
+
+  "river/tags": {
+    "num-tags": 9,
+    "tag-labels": ["q", "w", "e", "r", "t", "y", "u", "i", "o"]
+  },
+
+  "tray": {
+    "icon-size": 22,
+    "spacing": 0
+  },
+
+  "battery" : {
+    "format": "BAT {capacity:3}%  ",
+    "format-charging": "BAT {capacity:3}% ↑",
+    "format-discharging": "BAT {capacity:3}% ↓",
+    "states": {
+      "warning": 10,
+      "critical": 5
+    }
+  },
+
+  "clock": {
+    "format": "{:%b %d (%a) %R}",
+    "interval": 1,
+    "on-click": "yad --calendar --undecorated --fixed --close-on-unfocus --no-buttons --title CALENDAR > /dev/null",
+    "tooltip": false
+  },
+
+  "network": {
+    "format-wifi": "{essid} {signalStrength}%",
+    "format-ethernet": "{ifname}: {ipaddr}/{cidr}",
+    "format-linked": "{ifname} (No IP)",
+    "format-disconnected": "Disconnected",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}",
+    "tooltip": false
+  },
+
+  "pulseaudio": {
+      "format": "VOL {volume:3}%  ",
+      "format-bluetooth": "VOL {volume:3}% ",
+      "format-muted": "VOL ----  ",
+      "scroll-step": 1,
+      "on-click": "pavucontrol"
+  },
+
+  "cpu": {
+    "format": "CPU {usage:3}%",
+    "interval": 1,
+    "states": {
+      "warning": 50,
+      "critical": 90
+    },
+    "tooltip": false
+  },
+
+  "memory": {
+    "format": "MEM {}%",
+    "interval": 1,
+    "states": {
+      "warning": 50,
+      "critical": 90
+    },
+    "tooltip": false
+  },
+}

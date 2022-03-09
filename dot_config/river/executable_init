@@ -1,0 +1,115 @@
+#!/bin/sh
+
+# dbus/systemd user session
+# https://github.com/swaywm/sway/wiki#gtk-applications-take-20-seconds-to-start
+dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+
+restart() { ( killall $1; $@ )>/dev/null 2>&1 & }
+start()   { ( ps -C $1 || $@ )>/dev/null 2>&1 & }
+
+# autostart
+restart waybar
+start mullvad-vpn
+start nm-applet --indicator
+restart kanshi
+restart wlsunset -l 47.64 -L 9.32
+
+# execute this file
+riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
+
+# menu https://github.com/enkore/j4-dmenu-desktop#i-want-it-to-display-normal-binaries-too-yes
+riverctl map normal Super D spawn "j4-dmenu-desktop --dmenu='(cat ; (stest -flx $(echo $PATH | tr : ' ') | sort -u)) | bemenu -i -p \"run:\"' --term=$TERMINAL"
+
+# lock, suspend, etc.
+riverctl map normal Super Escape spawn "swaylock"
+riverctl map normal Super+Shift+Control X exit
+for mode in normal locked; do
+    [ "$HOSTNAME" != "G505s" ] && riverctl map $mode Super Z spawn "swaylock & systemctl suspend"
+    riverctl map $mode Super+Shift+Control Z spawn "shutdown now"
+    riverctl map $mode Super+Alt+Shift+Control Z spawn "shutdown -r now"
+done
+
+# terminal
+riverctl map normal Super Return spawn $TERMINAL
+
+# screenshots
+riverctl map normal Super S spawn 'IMG="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d-%H%M%S-%3N.png)" && grim "$IMG" && wl-copy < "$IMG"'
+riverctl map normal Super+Shift S spawn 'IMG="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d-%H%M%S-%3N.png)" && grim -g "$(slurp)" "$IMG" && wl-copy < "$IMG"'
+
+# view management
+riverctl attach-mode bottom
+riverctl map normal Super J focus-view next
+riverctl map normal Super K focus-view previous
+riverctl map normal Super+Shift J swap next
+riverctl map normal Super+Shift K swap previous
+riverctl map normal Super X close
+riverctl map normal Super F toggle-fullscreen
+
+# tag management
+count=0
+for i in q w e r t y u i o; do
+    tags=$((1 << count))
+    count=$((count + 1))
+    riverctl map normal Super $i set-focused-tags $tags
+    riverctl map normal Super+Shift $i set-view-tags $tags
+    riverctl map normal Super+Control $i toggle-focused-tags $tags
+    riverctl map normal Super+Shift+Control $i toggle-view-tags $tags
+done
+all_tags=$(( (1 << 9) - 1 ))
+riverctl map normal Super p set-focused-tags $all_tags
+riverctl map normal Super+Shift p set-view-tags $all_tags
+
+# output management
+riverctl map -repeat normal Super Period focus-output next
+riverctl map -repeat normal Super Comma focus-output previous
+riverctl map normal Super+Shift Period send-to-output next
+riverctl map normal Super+Shift Comma send-to-output previous
+
+# floating management
+riverctl map normal Super Space toggle-float
+riverctl map-pointer normal Super BTN_LEFT move-view
+riverctl map-pointer normal Super BTN_RIGHT resize-view
+riverctl float-filter-add app-id "pavucontrol"
+riverctl float-filter-add title "LibreWolf — Sharing Indicator"
+riverctl float-filter-add title "Firefox — Sharing Indicator"
+
+# layout config
+restart stacktile --inner-padding 0 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.5
+riverctl default-layout stacktile
+riverctl map -repeat normal Super H send-layout-cmd stacktile "primary_ratio -0.05"
+riverctl map -repeat normal Super L send-layout-cmd stacktile "primary_ratio +0.05"
+riverctl map -repeat normal Super+Control J send-layout-cmd stacktile "secondary_ratio +0.05"
+riverctl map -repeat normal Super+Control K send-layout-cmd stacktile "secondary_ratio -0.05"
+riverctl map normal Super+Shift L send-layout-cmd stacktile "primary_count -1"
+riverctl map normal Super+Shift H send-layout-cmd stacktile "primary_count +1"
+riverctl map normal Super+Control L send-layout-cmd stacktile "secondary_count -1"
+riverctl map normal Super+Control H send-layout-cmd stacktile "secondary_count +1"
+riverctl map normal Super+Shift F spawn "riverctl send-layout-cmd stacktile 'all_primary true' && riverctl send-layout-cmd stacktile 'primary_sublayout full'"
+riverctl map normal Super+Shift+Control F spawn "riverctl send-layout-cmd stacktile 'all_primary false' && riverctl send-layout-cmd stacktile 'primary_sublayout columns'"
+
+# controls
+for mode in normal locked; do
+    riverctl map -repeat $mode Super Bracketleft spawn "pamixer --allow-boost --set-limit 150 -d 5"
+    riverctl map -repeat $mode Super Bracketright spawn "pamixer --allow-boost --set-limit 150 -i 5"
+    riverctl map $mode Super M spawn "pamixer --toggle-mute"
+    riverctl map -repeat $mode None XF86AudioLowerVolume spawn "pamixer -d 5"
+    riverctl map -repeat $mode None XF86AudioRaiseVolume spawn "pamixer -i 5"
+    riverctl map $mode None XF86AudioMute spawn "pamixer --toggle-mute"
+    riverctl map -repeat $mode Super+Shift Bracketleft spawn "light -U 5"
+    riverctl map -repeat $mode Super+Shift Bracketright spawn "light -A 5"
+done
+
+# passthrough mode
+riverctl declare-mode passthrough
+riverctl map normal Super Grave enter-mode passthrough
+riverctl map passthrough Super Grave enter-mode normal
+
+# repeat rate and delay
+riverctl set-repeat 75 175
+
+# style
+riverctl background-color 0x000000
+riverctl border-color-focused 0x63d1f4
+riverctl border-color-unfocused 0x000000
+riverctl border-color-urgent 0xffff00
+riverctl border-width 2

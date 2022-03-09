@@ -1,0 +1,5 @@
+ignore-empty-password
+show-failed-attempts
+color=282828
+inside-color=282828
+indicator-radius=100

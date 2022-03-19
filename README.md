@@ -3,7 +3,7 @@ My configuration files for Arch Linux managed with [chezmoi](https://www.chezmoi
 
 ## Deploy
 ### New machine
-`chezmoi init --apply https://github.com/pmkap/dotfiles.git`
+`chezmoi init --apply pmkap`
 
 ### Update machine
 `chezmoi update -v`

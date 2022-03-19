@@ -1,2 +1,7 @@
 default-timeout=3000
 anchor=top-center
+
+[urgency=critical]
+background-color=#F6BE00
+border-color=#FFFF00
+text-color=#000000

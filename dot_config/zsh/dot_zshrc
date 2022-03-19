@@ -46,6 +46,12 @@ alias cp="cp -i"
 alias tar="bsdtar"
 alias lsblkk="lsblk -o NAME,RM,RO,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS"
 alias wget="wget --hsts-file=$HOME/.local/share/wget/wget-hsts"
+alias ch="chezmoi"
+
+f() {
+    fff "$@"
+    cd "$(cat "${XDG_CACHE_HOME:=${HOME}/.cache}/fff/.fff_d")"
+}
 
 ### OSC 7 sequence ###
 # https://codeberg.org/dnkl/foot/wiki#how-to-configure-my-shell-to-emit-the-osc-7-escape-sequence

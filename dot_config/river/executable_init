@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# dbus/systemd user session
-# https://github.com/swaywm/sway/wiki#gtk-applications-take-20-seconds-to-start
 dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 
 restart() { ( killall $1; $@ )>/dev/null 2>&1 & }
@@ -32,9 +30,39 @@ done
 # terminal
 riverctl map normal Super Return spawn $TERMINAL
 
-# screenshots
-riverctl map normal Super S spawn 'IMG="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d-%H%M%S-%3N.png)" && grim "$IMG" && wl-copy < "$IMG"'
-riverctl map normal Super+Shift S spawn 'IMG="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d-%H%M%S-%3N.png)" && grim -g "$(slurp)" "$IMG" && wl-copy < "$IMG"'
+# screenshot
+riverctl map normal Super S spawn '(
+    IMG="$HOME/Pictures/Screenshots/$(date +%Y%m%d_%Hh%Mm%S.%2Ns).png"
+    grim "$IMG"
+    notify-send "Screenshot taken" "Saved as $IMG and copied to clipboard."
+    wl-copy < "$IMG"
+)'
+
+# screenshot region
+riverctl map normal Super+Shift S spawn '(
+    IMG="$HOME/Pictures/Screenshots/$(date +%Y%m%d_%Hh%Mm%S.%2Ns).png"
+    grim -g "$(slurp)" "$IMG"
+    notify-send "Screenshot taken" "Saved as $IMG and copied to clipboard."
+    wl-copy < "$IMG"
+)'
+
+# screen recording
+riverctl map normal Super+Control S spawn '(
+    if ps -C wf-recorder >/dev/null 2>&1; then
+        VID="$(pgrep -xa wf-recorder | cut -d" " -f4)"
+        killall -SIGINT wf-recorder
+        notify-send "Screen recording stopped." "Saved as $VID."
+    else
+        OUTPUT="$(lswt -j | jq -r ".[] | select(.activated == true) | .outputs[0]")"
+        if [ -n "$OUTPUT" ]; then
+            VID="$HOME/Pictures/Screenshots/rec_$(date +%Y%m%d_%Hh%Mm%S.%2Ns).mp4"
+            notify-send -t 1000 "Screen recording startet..."
+            wf-recorder -f "$VID" -o "$OUTPUT"
+        else
+            notify-send -u critical "Screen recording failed."
+        fi
+    fi
+)'
 
 # view management
 riverctl attach-mode bottom

@@ -15,6 +15,7 @@ require('packer').startup(function(use)
   use { 'lewis6991/gitsigns.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   use 'tpope/vim-sleuth'
   use 'numToStr/Comment.nvim'
+  use 'sitiom/nvim-numbertoggle'
 
   use 'nvim-treesitter/nvim-treesitter'
   use { 'nvim-treesitter/nvim-treesitter-textobjects', after = { 'nvim-treesitter' } }
@@ -24,7 +25,6 @@ require('packer').startup(function(use)
   use { 'hrsh7th/nvim-cmp', requires = { 'hrsh7th/cmp-nvim-lsp' } }
   use { 'L3MON4D3/LuaSnip', requires = { 'saadparwaiz1/cmp_luasnip' } }
 
-  use 'mjlbach/onedark.nvim'
   use 'ellisonleao/gruvbox.nvim'
 
   use 'nvim-lualine/lualine.nvim'
@@ -77,13 +77,16 @@ vim.cmd [[colorscheme gruvbox]]
 vim.o.completeopt = 'menuone,noselect'
 vim.o.splitbelow = true
 vim.o.splitright = true
-
+vim.o.laststatus = 3
 -- [[ Basic Keymaps ]]
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.o.cmdheight = 0
+vim.o.autoread = true
+vim.cmd [[autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o]]
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
@@ -111,9 +114,19 @@ require('lualine').setup {
     component_separators = '|',
     section_separators = '',
   },
+  winbar = {
+    lualine_a = {'%f'},
+    lualine_b = {'%m'},
+  },
+  inactive_winbar = {
+    lualine_b = {'%f'},
+    lualine_c = {'%m'},
+  },
 }
 
 require('Comment').setup()
+
+require("numbertoggle").setup()
 
 require('indent_blankline').setup {
   char = '┊',
@@ -288,7 +301,7 @@ for _, lsp in ipairs(servers) do
 end
 
 -- Example custom configuration for lua
---
+
 -- Make runtime files discoverable to the server
 local runtime_path = vim.split(package.path, ';')
 table.insert(runtime_path, 'lua/?.lua')
@@ -379,9 +392,6 @@ vim.keymap.set('n', '<leader>.', ':bnext<CR>')
 vim.keymap.set('i', '<C-U>', '<C-G>u<C-U>')
 vim.keymap.set('i', '<C-W>', '<C-G>u<C-W>')
 
--- disables automatic commenting on newline
--- autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-
 -- change to the dir of currently open file
 vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>:pwd<CR>')
 
@@ -389,27 +399,24 @@ vim.keymap.set('n', '<leader>cd', ':cd %:p:h<CR>:pwd<CR>')
 vim.keymap.set('n', '<leader>w', ':w<CR>')
 vim.keymap.set('n', '<leader>q', ':q<CR>')
 vim.keymap.set('n', '<leader>bd', ':bd<CR>')
---
+
 -- system clipboard
--- noremap <leader>y "+y
--- noremap <leader>Y "+Y
--- noremap <leader>p "+p
--- noremap <leader>P "+P
---
--- " automatic reload if file changed
--- set autoread
--- autocmd FocusGained,BufEnter * :silent! !
---
+vim.keymap.set( {'n', 'v'} , '<leader>y', '"+y')
+vim.keymap.set('n', '<leader>Y', '"+Y')
+vim.keymap.set('n', '<leader>p', '"+p')
+vim.keymap.set('n', '<leader>P', '"+P')
+
+-- " disable annoying defaults
+vim.keymap.set('n', 'ZZ', '<ESC>')
+
+vim.keymap.set('n', '<leader><leader>x', ':w<CR>:so %<CR>')
+
 -- " better increasing/decreasing with <C-a>/<C-x>
 -- set nrformats-=octal
---
--- " disable annoying defaults
--- nnoremap ZZ <ESC>
---
--- set laststatus=3
 --
 -- " https://github.com/mhinz/neovim-remote
 -- let $GIT_EDITOR = 'nvr -cc vsplit --remote-wait'
 -- autocmd FileType gitcommit,gitrebase,gitconfig set bufhidden=delete
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

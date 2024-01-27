@@ -19,7 +19,7 @@ riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
 riverctl map normal Super D spawn "j4-dmenu-desktop --dmenu='(cat ; (stest -flx $(echo $PATH | tr : ' ') | sort -u)) | bemenu -i -p \"run:\"' --term=$TERMINAL"
 
 # lock, suspend, etc.
-riverctl map normal Super Escape spawn "swaylock"
+riverctl map normal Super Escape spawn "waylock"
 riverctl map normal Super+Shift+Control X exit
 for mode in normal locked; do
     [ "$HOSTNAME" != "G505s" ] && riverctl map $mode Super Z spawn "swaylock & systemctl suspend"
@@ -98,9 +98,10 @@ riverctl map normal Super+Shift Comma send-to-output previous
 riverctl map normal Super Space toggle-float
 riverctl map-pointer normal Super BTN_LEFT move-view
 riverctl map-pointer normal Super BTN_RIGHT resize-view
-riverctl float-filter-add app-id "pavucontrol"
-riverctl float-filter-add title "LibreWolf — Sharing Indicator"
-riverctl float-filter-add title "Firefox — Sharing Indicator"
+riverctl rule-add -app-id "pavucontrol" float
+riverctl rule-add -app-id "flameshot" float
+riverctl rule-add -title "LibreWolf — Sharing Indicator" float
+riverctl rule-add -title "Firefox — Sharing Indicator" float
 
 # layout config
 restart stacktile --inner-padding 0 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.5

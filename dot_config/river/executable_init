@@ -1,16 +1,17 @@
 #!/bin/sh
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 
-dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-
-restart() { ( killall $1; $@ )>/dev/null 2>&1 & }
-start()   { ( ps -C $1 || $@ )>/dev/null 2>&1 & }
+restart() { ( killall $1; eval $@ )>/dev/null 2>&1 & }
+start()   { ( ps -C $1 || eval $@ )>/dev/null 2>&1 & }
 
 # autostart
+start swayidle -w before-sleep \"waylock -fork-on-lock\" timeout 300 \"waylock -fork-on-lock\"
 restart waybar
-start mullvad-vpn
 start nm-applet --indicator
-restart kanshi
-restart wlsunset -l 47.6 -L 9.4
+start way-displays
+start wlsunset -l 47.6 -L 9.4
+start mattermost-desktop
+start flameshot
 
 # execute this file
 riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
@@ -22,48 +23,68 @@ riverctl map normal Super D spawn "j4-dmenu-desktop --dmenu='(cat ; (stest -flx 
 riverctl map normal Super Escape spawn "waylock"
 riverctl map normal Super+Shift+Control X exit
 for mode in normal locked; do
-    [ "$HOSTNAME" != "G505s" ] && riverctl map $mode Super Z spawn "swaylock & systemctl suspend"
+    [ "$HOSTNAME" != "G505s" ] && riverctl map $mode Super+Shift Z spawn "waylock & systemctl suspend"
     riverctl map $mode Super+Shift+Control Z spawn "shutdown now"
     riverctl map $mode Super+Alt+Shift+Control Z spawn "shutdown -r now"
+    riverctl map $mode Super F4 spawn "wlr-randr --output eDP-1 --toggle"
 done
 
 # terminal
 riverctl map normal Super Return spawn $TERMINAL
 
 # screenshot
-riverctl map normal Super S spawn '(
-    IMG="$HOME/Pictures/Screenshots/$(date +%Y%m%d_%Hh%Mm%S.%2Ns).png"
-    grim "$IMG"
-    notify-send "Screenshot taken" "Saved as $IMG and copied to clipboard."
-    wl-copy < "$IMG"
-)'
+riverctl map normal Super S spawn "flameshot gui"
+riverctl map normal None Print spawn "flameshot gui"
 
-# screenshot region
-riverctl map normal Super+Shift S spawn '(
-    IMG="$HOME/Pictures/Screenshots/$(date +%Y%m%d_%Hh%Mm%S.%2Ns).png"
-    if grim -g "$(slurp)" "$IMG"; then
-        notify-send "Screenshot taken" "Saved as $IMG and copied to clipboard."
-        wl-copy < "$IMG"
-    fi
-)'
-
-# screen recording
-riverctl map normal Super+Control S spawn '(
-    if ps -C wf-recorder >/dev/null 2>&1; then
+# screen recording fullscreen
+riverctl map normal Super+Control S spawn '{
+    set -e
+    if ps -C wf-recorder; then
         VID="$(pgrep -xa wf-recorder | cut -d" " -f4)"
         killall -SIGINT wf-recorder
         notify-send "Screen recording stopped." "Saved as $VID."
     else
         OUTPUT="$(lswt -j | jq -r ".[] | select(.activated == true) | .outputs[0]")"
-        if [ -n "$OUTPUT" ]; then
-            VID="$HOME/Pictures/Screenshots/rec_$(date +%Y%m%d_%Hh%Mm%S.%2Ns).mp4"
-            notify-send -t 1000 "Screen recording startet..."
-            wf-recorder -f "$VID" -o "$OUTPUT"
-        else
-            notify-send -u critical "Screen recording failed."
-        fi
+        VID="$HOME/Pictures/Screenshots/rec_$(date +%Y%m%d_%Hh%Mm%S.%2Ns).mp4"
+        notify-send -t 1000 "Screen recording startet..."
+        wf-recorder -f "$VID" -o "$OUTPUT"
     fi
-)'
+}>/dev/null 2>&1'
+
+# screen recording area
+riverctl map normal Super+Shift+Control S spawn '{
+    set -e
+    if ps -C wf-recorder; then
+        VID="$(pgrep -xa wf-recorder | cut -d" " -f4)"
+        killall -SIGINT wf-recorder
+        notify-send "Screen recording stopped." "Saved as $VID."
+    else
+        OUTPUT="$(lswt -j | jq -r ".[] | select(.activated == true) | .outputs[0]")"
+        VID="$HOME/Pictures/Screenshots/rec_$(date +%Y%m%d_%Hh%Mm%S.%2Ns).mp4"
+        AREA="$(slurp)"
+        notify-send -t 1000 "Screen recording startet..."
+        wf-recorder -f "$VID" -o "$OUTPUT" -g "$AREA"
+    fi
+}>/dev/null 2>&1'
+
+# VPN
+riverctl map normal Super+Shift V spawn '{
+    if nmcli connection show wireguard | grep activated; then
+        nmcli connection down wireguard
+    else
+        nmcli connection up wireguard
+    fi
+}>/dev/null 2>&1'
+
+# mako silent mode
+riverctl map normal Super+Shift M spawn '{
+    if makoctl mode | grep silent; then
+        makoctl dismiss -a
+        makoctl mode -r silent
+    else
+        makoctl mode -a silent
+    fi
+}>/dev/null 2>&1'
 
 # view management
 riverctl attach-mode bottom
@@ -88,11 +109,13 @@ all_tags=$(( (1 << 9) - 1 ))
 riverctl map normal Super p set-focused-tags $all_tags
 riverctl map normal Super+Shift p set-view-tags $all_tags
 
+riverctl rule-add -app-id "Mattermost" tags $((1 << 7))
+
 # output management
 riverctl map -repeat normal Super Period focus-output next
 riverctl map -repeat normal Super Comma focus-output previous
-riverctl map normal Super+Shift Period send-to-output next
-riverctl map normal Super+Shift Comma send-to-output previous
+riverctl map normal Super+Shift Period send-to-output -current-tags next
+riverctl map normal Super+Shift Comma send-to-output -current-tags previous
 
 # floating management
 riverctl map normal Super Space toggle-float
@@ -102,9 +125,13 @@ riverctl rule-add -app-id "pavucontrol" float
 riverctl rule-add -app-id "flameshot" float
 riverctl rule-add -title "LibreWolf — Sharing Indicator" float
 riverctl rule-add -title "Firefox — Sharing Indicator" float
+riverctl rule-add -title "Yubico Authenticator" float
+
+# window decoration
+riverctl rule-add -app-id "*" ssd
 
 # layout config
-restart stacktile --inner-padding 0 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.5
+start stacktile --inner-padding 0 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.5 --secondary-count 2
 riverctl default-layout stacktile
 riverctl map -repeat normal Super H send-layout-cmd stacktile "primary_ratio -0.05"
 riverctl map -repeat normal Super L send-layout-cmd stacktile "primary_ratio +0.05"
@@ -120,13 +147,15 @@ riverctl map normal Super+Shift+Control F spawn "riverctl send-layout-cmd stackt
 # controls
 for mode in normal locked; do
     riverctl map -repeat $mode Super Bracketleft spawn "pamixer --allow-boost --set-limit 150 -d 5"
-    riverctl map -repeat $mode Super Bracketright spawn "pamixer --allow-boost --set-limit 150 -i 5"
+    riverctl map -repeat $mode Super Bracketright spawn "pamixer --unmute --allow-boost --set-limit 150 -i 5"
     riverctl map $mode Super M spawn "pamixer --toggle-mute"
-    riverctl map -repeat $mode None XF86AudioLowerVolume spawn "pamixer -d 5"
-    riverctl map -repeat $mode None XF86AudioRaiseVolume spawn "pamixer -i 5"
+    riverctl map -repeat $mode None XF86AudioLowerVolume spawn "pamixer --allow-boost --set-limit 150 -d 5"
+    riverctl map -repeat $mode None XF86AudioRaiseVolume spawn "pamixer --unmute --allow-boost --set-limit 150 -i 5"
     riverctl map $mode None XF86AudioMute spawn "pamixer --toggle-mute"
-    riverctl map -repeat $mode Super+Shift Bracketleft spawn "light -U 5"
-    riverctl map -repeat $mode Super+Shift Bracketright spawn "light -A 5"
+    riverctl map -repeat $mode None XF86MonBrightnessDown spawn "brightnessctl s 5%-"
+    riverctl map -repeat $mode None XF86MonBrightnessUp spawn "brightnessctl s +5%"
+    riverctl map -repeat $mode Super+Shift Bracketleft spawn "brightnessctl s 5%-"
+    riverctl map -repeat $mode Super+Shift Bracketright spawn "brightnessctl s +5%"
 done
 
 # passthrough mode

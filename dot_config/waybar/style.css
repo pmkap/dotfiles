@@ -4,8 +4,8 @@ window#waybar {
 
 * {
     border-radius: 5px;
-    font-family: JetBrains Mono Nerd Font;
-    font-size: 14px;
+    font-family: JetBrains Mono Nerd Font, Font Awesome;
+    font-size: 16px;
     font-weight: bold;
     min-height: 0;
 }
@@ -16,7 +16,7 @@ window#waybar {
 
 #tags button {
     margin: 0 5px 0 0;
-    padding: 0 1.5px;
+    padding: 0 3px;
     border: 2px solid #000000;
     color: #444444;
 }
@@ -46,8 +46,15 @@ window#waybar {
     border: 2px solid #ffff00;
 }
 
-#backlight,
-#tray,
+#mode.normal {
+    color: #000000;
+}
+
+#mode {
+    color: #ff0000;
+    padding: 0 0 0 10px;
+}
+
 #pulseaudio,
 #clock,
 #cpu,
@@ -55,19 +62,21 @@ window#waybar {
 #network,
 #battery {
     color: #ffffff;
-    margin: 0 0 1px 30px;
 }
 
 #cpu.warning,
 #memory.warning,
 #battery.warning {
     color: #ffff00;
-    margin: 0 0 1px 30px;
 }
 
 #cpu.critical,
 #memory.critical,
 #battery.critical {
     color: #ff0000;
-    margin: 0 0 1px 30px;
+}
+
+#custom-separator {
+    color: #444444;
+    margin: 0 20px 0px 20px;
 }

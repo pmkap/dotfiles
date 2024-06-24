@@ -1,7 +1,12 @@
-default-timeout=3000
+default-timeout=4000
 anchor=top-center
+max-history=100
+on-button-left=invoke-default-action
 
 [urgency=critical]
 background-color=#F6BE00
 border-color=#FFFF00
 text-color=#000000
+
+[mode=silent]
+invisible=1

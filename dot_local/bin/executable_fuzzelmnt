@@ -1,0 +1,34 @@
+#!/bin/bash
+set -euo pipefail
+
+# dependencies: udiskie, fuzzel, libnotify, wl-clipboard
+
+all_partitions() {
+    udiskie-info -a -f is_partition -o ui_label
+}
+
+mounted_partitions() {
+    udiskie-info -a -f is_partition -f is_mounted -o ui_label
+}
+
+unmounted_partitions() {
+    comm -23 <(all_partitions) <(mounted_partitions)
+}
+
+if [ "$1" = "mount" ]; then
+    CHOICE="$(unmounted_partitions | fuzzel -d -p "mount > ")"
+    DEVICE="$(echo $CHOICE | cut -d: -f1)"
+    LABEL="$(echo $CHOICE | cut -d: -f2 | cut -c2-)"
+    MOUNTPATH="\"/run/media/$USER/$LABEL\""
+
+    udiskie-mount "$DEVICE"
+    wl-copy "$MOUNTPATH"
+    notify-send "$DEVICE mounted to $MOUNTPATH. Copied to clipboard."
+
+elif [ "$1" = "umount" ]; then
+    CHOICE="$(mounted_partitions | fuzzel -d -p "unmount > ")"
+    DEVICE="$(echo $CHOICE | cut -d: -f1)"
+
+    udiskie-umount "$DEVICE"
+    notify-send "$DEVICE unounted."
+fi

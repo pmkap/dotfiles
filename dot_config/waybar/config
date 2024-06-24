@@ -1,43 +1,62 @@
 {
+  "output": ["eDP-1", "LG Electronics LG ULTRAWIDE 0x000195F3"],
+
   "modules-left": [
-    "river/tags"
+    "river/tags",
+    "river/mode",
+  ],
+
+  "modules-center": [
+    "custom/mako",
   ],
 
   "modules-right": [
-    "network",
-    "cpu",
     "memory",
+    "custom/separator",
+    //"cpu",
+    "network",
+    "custom/separator",
     "battery",
+    "custom/separator",
     "pulseaudio",
+    "custom/separator",
     "clock",
-    "tray"
+    "custom/separator",
+    "tray",
   ],
+
+  "custom/separator": {
+      "format": "|",
+      "interval": "once",
+      "tooltip": false
+  },
 
   "river/tags": {
     "num-tags": 9,
-    "tag-labels": ["q", "w", "e", "r", "t", "y", "u", "i", "o"]
+    "tag-labels": ["q", "w", "e", "r", "t", "y", "u", "i", "o"],
   },
 
   "tray": {
     "icon-size": 22,
-    "spacing": 0
+    "spacing": 0,
   },
 
   "battery" : {
-    "format": "BAT {capacity:3}%  ",
-    "format-charging": "BAT {capacity:3}% ↑",
-    "format-discharging": "BAT {capacity:3}% ↓",
+    "format-icons": [" ", " ", " ", " ", " "],
+    "format": "{icon} {capacity}%",
+    "format-charging": "{icon} {capacity}% ↑",
+    "format-discharging": "{icon} {capacity}% ↓",
     "states": {
-      "warning": 10,
-      "critical": 5
-    }
+      "warning": 20,
+      "critical": 10,
+    },
+    "interval": 10,
   },
 
   "clock": {
     "format": "{:%b %d (%a) %R}",
     "interval": 1,
     "on-click": "yad --calendar --undecorated --fixed --close-on-unfocus --no-buttons --title CALENDAR > /dev/null",
-    "tooltip": false
   },
 
   "network": {
@@ -46,34 +65,47 @@
     "format-linked": "{ifname} (No IP)",
     "format-disconnected": "Disconnected",
     "format-alt": "{ifname}: {ipaddr}/{cidr}",
-    "tooltip": false
+    "tooltip": false,
   },
 
   "pulseaudio": {
-      "format": "VOL {volume:3}%  ",
-      "format-bluetooth": "VOL {volume:3}% ",
-      "format-muted": "VOL ----  ",
-      "scroll-step": 1,
-      "on-click": "pavucontrol"
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "default": ["", "", ""],
+    },
+    "format": "{icon} {volume:3}%",
+    "format-bluetooth": "{icon} {volume:3}% ",
+    "format-muted": " ----",
+    "scroll-step": 1,
+    "on-click": "pavucontrol",
   },
 
-  "cpu": {
-    "format": "CPU {usage:3}%",
-    "interval": 1,
-    "states": {
-      "warning": 50,
-      "critical": 90
-    },
-    "tooltip": false
-  },
+  //"cpu": {
+  //  "format": "CPU {usage:3}%",
+  //  "interval": 1,
+  //  "states": {
+  //    "warning": 50,
+  //    "critical": 90,
+  //  },
+  //},
 
   "memory": {
     "format": "MEM {}%",
     "interval": 1,
     "states": {
       "warning": 50,
-      "critical": 90
+      "critical": 80,
     },
-    "tooltip": false
+  },
+
+  "custom/mako": {
+    "exec": "makoctl mode | grep silent >/dev/null && echo ⛔",
+    "interval": "once",
+    "signal": 1,
+    "tooltip": false,
   },
 }

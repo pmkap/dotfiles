@@ -1,8 +1,0 @@
-profile "G505s + thomson" {
-    output "Technical Concepts Ltd      DTV      0x00000101 (HDMI-A-1)"     position 0,0        scale 1
-    output "Unknown 0x4652 0x00000000 (eDP-1)"                              position 1366,0     scale 1
-}
-
-profile "G505s" {
-    output "Unknown 0x4652 0x00000000 (eDP-1)"                              position 0,0        scale 1
-}

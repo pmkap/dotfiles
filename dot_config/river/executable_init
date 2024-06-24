@@ -1,71 +1,65 @@
 #!/bin/sh
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP
 
-restart() { ( killall $1; eval $@ )>/dev/null 2>&1 & }
-start()   { ( ps -C $1 || eval $@ )>/dev/null 2>&1 & }
+WAYLOCK="waylock -fork-on-lock -ignore-empty-password"
 
 # autostart
-start swayidle -w before-sleep \"waylock -fork-on-lock\" timeout 300 \"waylock -fork-on-lock\"
-restart waybar
-start nm-applet --indicator
-start way-displays
-start wlsunset -l 47.6 -L 9.4
-start mattermost-desktop
-start flameshot
+launch -l swayidle -w before-sleep \"$WAYLOCK\" timeout 600 \"$WAYLOCK\"
+launch -rl waybar
+launch nm-applet --indicator
+launch -l way-displays
+launch wlsunset -l 47.6 -L 9.4
+launch -l mattermost-desktop
+XDG_CURRENT_DESKTOP=sway launch flameshot
+launch /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 # execute this file
 riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
 
-# menu https://github.com/enkore/j4-dmenu-desktop#i-want-it-to-display-normal-binaries-too-yes
-riverctl map normal Super D spawn "j4-dmenu-desktop --dmenu='(cat ; (stest -flx $(echo $PATH | tr : ' ') | sort -u)) | bemenu -i -p \"run:\"' --term=$TERMINAL"
+# keyboard
+riverctl keyboard-layout -options caps:swapescape eu
+
+# menu
+riverctl map normal Super D spawn "fuzzel --list-executables-in-path"
 
 # lock, suspend, etc.
-riverctl map normal Super Escape spawn "waylock"
+riverctl map normal Super Escape spawn "$WAYLOCK"
 riverctl map normal Super+Shift+Control X exit
+riverctl map normal Super+Shift Z spawn "$WAYLOCK && systemctl suspend"
+riverctl map locked Super+Shift Z spawn "systemctl suspend"
 for mode in normal locked; do
-    [ "$HOSTNAME" != "G505s" ] && riverctl map $mode Super+Shift Z spawn "waylock & systemctl suspend"
     riverctl map $mode Super+Shift+Control Z spawn "shutdown now"
     riverctl map $mode Super+Alt+Shift+Control Z spawn "shutdown -r now"
     riverctl map $mode Super F4 spawn "wlr-randr --output eDP-1 --toggle"
 done
 
+# waybar toggle
+riverctl map normal Super+Control B spawn "killall -SIGUSR1 waybar"
+
 # terminal
 riverctl map normal Super Return spawn $TERMINAL
 
 # screenshot
-riverctl map normal Super S spawn "flameshot gui"
-riverctl map normal None Print spawn "flameshot gui"
+riverctl map normal Super S spawn "XDG_CURRENT_DESKTOP=sway flameshot gui"
+riverctl map normal None Print spawn "XDG_CURRENT_DESKTOP=sway flameshot gui"
 
-# screen recording fullscreen
-riverctl map normal Super+Control S spawn '{
-    set -e
+# screen recording
+riverctl map normal Super+Shift S spawn '{
+    set -eu
     if ps -C wf-recorder; then
         VID="$(pgrep -xa wf-recorder | cut -d" " -f4)"
         killall -SIGINT wf-recorder
-        notify-send "Screen recording stopped." "Saved as $VID."
+        wl-copy "$VID"
+        notify-send "Screen recording stopped." "Saved as $VID. Copied path to clipboard."
     else
-        OUTPUT="$(lswt -j | jq -r ".[] | select(.activated == true) | .outputs[0]")"
         VID="$HOME/Pictures/Screenshots/rec_$(date +%Y%m%d_%Hh%Mm%S.%2Ns).mp4"
-        notify-send -t 1000 "Screen recording startet..."
-        wf-recorder -f "$VID" -o "$OUTPUT"
+        if AREA="$(slurp)"; then
+            wf-recorder -f "$VID" -g "$AREA"
+        else
+            wf-recorder -f "$VID"
+        fi
     fi
-}>/dev/null 2>&1'
-
-# screen recording area
-riverctl map normal Super+Shift+Control S spawn '{
-    set -e
-    if ps -C wf-recorder; then
-        VID="$(pgrep -xa wf-recorder | cut -d" " -f4)"
-        killall -SIGINT wf-recorder
-        notify-send "Screen recording stopped." "Saved as $VID."
-    else
-        OUTPUT="$(lswt -j | jq -r ".[] | select(.activated == true) | .outputs[0]")"
-        VID="$HOME/Pictures/Screenshots/rec_$(date +%Y%m%d_%Hh%Mm%S.%2Ns).mp4"
-        AREA="$(slurp)"
-        notify-send -t 1000 "Screen recording startet..."
-        wf-recorder -f "$VID" -o "$OUTPUT" -g "$AREA"
-    fi
-}>/dev/null 2>&1'
+}'
 
 # VPN
 riverctl map normal Super+Shift V spawn '{
@@ -84,10 +78,34 @@ riverctl map normal Super+Shift M spawn '{
     else
         makoctl mode -a silent
     fi
+    pkill -x waybar -RTMIN+1
 }>/dev/null 2>&1'
 
+# virtual display via vnc
+riverctl rule-add -title "WayVNC - TigerVNC" tags $((1 << 8))
+
+riverctl map normal Super G spawn '{
+    way-displays -d DISABLED HEADLESS-1
+    wayvnc -o HEADLESS-1 localhost 6666 &
+    sleep 0.5
+    vncviewer localhost::6666
+}'
+
+riverctl map normal Super+Shift G spawn '{
+    killall vncviewer
+    killall wayvnc
+    way-displays -s DISABLED HEADLESS-1
+}'
+
+# mounting
+riverctl map normal Super B spawn "fuzzelmnt mount"
+riverctl map normal Super+Shift B spawn "fuzzelmnt umount"
+
+# yubikey
+riverctl map normal Super A spawn "yubikey-oath-dmenu --menu-cmd \"fuzzel -d -p 'otp > '\" --clipboard --notify"
+
 # view management
-riverctl attach-mode bottom
+riverctl default-attach-mode below
 riverctl map normal Super J focus-view next
 riverctl map normal Super K focus-view previous
 riverctl map normal Super+Shift J swap next
@@ -121,17 +139,15 @@ riverctl map normal Super+Shift Comma send-to-output -current-tags previous
 riverctl map normal Super Space toggle-float
 riverctl map-pointer normal Super BTN_LEFT move-view
 riverctl map-pointer normal Super BTN_RIGHT resize-view
-riverctl rule-add -app-id "pavucontrol" float
+riverctl rule-add -app-id "org.pulseaudio.pavucontrol" float
 riverctl rule-add -app-id "flameshot" float
-riverctl rule-add -title "LibreWolf — Sharing Indicator" float
-riverctl rule-add -title "Firefox — Sharing Indicator" float
-riverctl rule-add -title "Yubico Authenticator" float
 
 # window decoration
-riverctl rule-add -app-id "*" ssd
+riverctl rule-add ssd
+riverctl rule-add -title CALENDAR position $(( $(wlr-randr | grep current | grep -oE '[0-9]+x' | tr -d x) - 300)) 30
 
 # layout config
-start stacktile --inner-padding 0 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.5 --secondary-count 2
+launch -rl stacktile --inner-padding 5 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.65 --secondary-count 2
 riverctl default-layout stacktile
 riverctl map -repeat normal Super H send-layout-cmd stacktile "primary_ratio -0.05"
 riverctl map -repeat normal Super L send-layout-cmd stacktile "primary_ratio +0.05"
@@ -157,6 +173,11 @@ for mode in normal locked; do
     riverctl map -repeat $mode Super+Shift Bracketleft spawn "brightnessctl s 5%-"
     riverctl map -repeat $mode Super+Shift Bracketright spawn "brightnessctl s +5%"
 done
+
+# disable Super when not used as modifier to prevent opening of the menu on
+# nested Windows or GNOME sessions
+riverctl map normal None Super_L spawn ""
+riverctl map normal None Super_R spawn ""
 
 # passthrough mode
 riverctl declare-mode passthrough

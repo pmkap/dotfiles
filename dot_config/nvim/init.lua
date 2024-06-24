@@ -112,12 +112,7 @@ require('lualine').setup {
 
 require('Comment').setup()
 
-require('numbertoggle').setup()
-
-require('indent_blankline').setup {
-    char = '┊',
-    show_trailing_blankline_indent = false,
-}
+require("ibl").setup()
 
 require('gitsigns').setup {
     signs = {
@@ -280,7 +275,7 @@ local on_attach = function(_, bufnr)
     -- end, '[W]orkspace [L]ist Folders')
 end
 
-local servers = { 'clangd', 'pyright', 'sumneko_lua' }
+local servers = { 'clangd', 'pyright', 'lua_ls' }
 local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 require('mason').setup()
@@ -301,7 +296,7 @@ local runtime_path = vim.split(package.path, ';')
 table.insert(runtime_path, 'lua/?.lua')
 table.insert(runtime_path, 'lua/?/init.lua')
 
-require('lspconfig').sumneko_lua.setup {
+require('lspconfig').lua_ls.setup {
     on_attach = on_attach,
     capabilities = capabilities,
     settings = {
@@ -394,14 +389,14 @@ vim.keymap.set('n', '<leader>q', '<cmd>q<CR>')
 vim.keymap.set('n', '<leader>bd', '<cmd>bd<CR>')
 
 -- clipboard and registers
-vim.o.clipboard = 'unnamedplus'
+-- vim.o.clipboard = 'unnamedplus'
 -- vim.keymap.set({ 'n', 'v' }, 'x', '"_x')
 -- vim.keymap.set({ 'n', 'v' }, 'c', '"_c')
 -- vim.keymap.set('v', '<leader>p', '"_dP')
--- vim.keymap.set({ 'n', 'v' }, '<leader>y', '"+y')
--- vim.keymap.set({ 'n', 'v' }, '<leader>Y', '"+Y')
--- vim.keymap.set({ 'n', 'v' }, '<leader>p', '"+p')
--- vim.keymap.set({ 'n', 'v' }, '<leader>P', '"+P')
+vim.keymap.set({ 'n', 'v' }, '<leader>y', '"+y')
+vim.keymap.set({ 'n', 'v' }, '<leader>Y', '"+Y')
+vim.keymap.set({ 'n', 'v' }, '<leader>p', '"+p')
+vim.keymap.set({ 'n', 'v' }, '<leader>P', '"+P')
 
 -- disable annoying defaults
 vim.keymap.set('n', 'ZZ', '<ESC>')

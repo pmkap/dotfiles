@@ -40,33 +40,39 @@ alias lla="ls -lA"
 alias vim="nvim"
 alias vi="nvim"
 alias sudo="sudo "
-alias rm="echo -E 'Disabled! Use trash(1) or \rm.'; false"
 alias mv="mv -i"
 alias cp="cp -i"
 alias tar="bsdtar"
 alias lsblkk="lsblk -o NAME,RM,RO,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS"
 alias wget="wget --hsts-file=$HOME/.local/share/wget/wget-hsts"
 alias ch="chezmoi"
+alias ssh="TERM=xterm-256color ssh"
+alias open="xdg-open"
+alias o="xdg-open"
+
+certcheck() {
+    curl -LIv $@ 2>&1 | grep "Server certificate" -A10
+}
 
 f() {
     fff "$@"
     cd "$(cat "${XDG_CACHE_HOME:=${HOME}/.cache}/fff/.fff_d")"
 }
 
-### OSC 7 sequence ###
+### OSC sequences for foot ###
 # https://codeberg.org/dnkl/foot/wiki#how-to-configure-my-shell-to-emit-the-osc-7-escape-sequence
 _urlencode() {
-	local length="${#1}"
-	for (( i = 0; i < length; i++ )); do
-		local c="${1:$i:1}"
-		case $c in
-			%) printf '%%%02X' "'$c" ;;
-			*) printf "%s" "$c" ;;
-		esac
-	done
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:$i:1}"
+        case $c in
+            %) printf '%%%02X' "'$c" ;;
+            *) printf "%s" "$c" ;;
+        esac
+    done
 }
 osc7_cwd() {
-	printf '\e]7;file://%s%s\e\\' "$HOSTNAME" "$(_urlencode "$PWD")"
+    printf '\e]7;file://%s%s\e\\' "$HOSTNAME" "$(_urlencode "$PWD")"
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook -Uz chpwd osc7_cwd

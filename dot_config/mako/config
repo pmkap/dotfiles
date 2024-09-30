@@ -1,5 +1,5 @@
 default-timeout=4000
-anchor=top-center
+anchor=bottom-center
 max-history=100
 on-button-left=invoke-default-action
 

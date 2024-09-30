@@ -10,10 +10,11 @@ SCALE:
     SCALE: 1
   - NAME_DESC: 'LG ULTRAWIDE'
     SCALE: 1
+  - NAME_DESC: 'Samsung Electric Company LC34G55T'
+    SCALE: 1
   - NAME_DESC: 'CB651Q'
-    SCALE: 1.5
+    SCALE: 2
   - NAME_DESC: 'E657Q'
     SCALE: 2
-
-DISABLED:
-  - 'HEADLESS-1'
+  - NAME_DESC: 'XMD Mi TV'
+    SCALE: 2

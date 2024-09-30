@@ -1,4 +1,9 @@
 #!/bin/sh
+set -eu
+
+# terminal
+riverctl map normal Super Return spawn $TERMINAL
+
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP
 
 WAYLOCK="waylock -fork-on-lock -ignore-empty-password"
@@ -9,7 +14,7 @@ launch -rl waybar
 launch nm-applet --indicator
 launch -l way-displays
 launch wlsunset -l 47.6 -L 9.4
-launch -l mattermost-desktop
+launch mattermost-desktop
 XDG_CURRENT_DESKTOP=sway launch flameshot
 launch /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
@@ -30,14 +35,10 @@ riverctl map locked Super+Shift Z spawn "systemctl suspend"
 for mode in normal locked; do
     riverctl map $mode Super+Shift+Control Z spawn "shutdown now"
     riverctl map $mode Super+Alt+Shift+Control Z spawn "shutdown -r now"
-    riverctl map $mode Super F4 spawn "wlr-randr --output eDP-1 --toggle"
 done
 
 # waybar toggle
 riverctl map normal Super+Control B spawn "killall -SIGUSR1 waybar"
-
-# terminal
-riverctl map normal Super Return spawn $TERMINAL
 
 # screenshot
 riverctl map normal Super S spawn "XDG_CURRENT_DESKTOP=sway flameshot gui"
@@ -82,27 +83,30 @@ riverctl map normal Super+Shift M spawn '{
 }>/dev/null 2>&1'
 
 # virtual display via vnc
-riverctl rule-add -title "WayVNC - TigerVNC" tags $((1 << 8))
-
-riverctl map normal Super G spawn '{
-    way-displays -d DISABLED HEADLESS-1
-    wayvnc -o HEADLESS-1 localhost 6666 &
-    sleep 0.5
-    vncviewer localhost::6666
-}'
-
-riverctl map normal Super+Shift G spawn '{
-    killall vncviewer
-    killall wayvnc
-    way-displays -s DISABLED HEADLESS-1
-}'
+#riverctl rule-add -title "WayVNC - TigerVNC" tags $((1 << 8))
+#
+#riverctl map normal Super G spawn '{
+#    way-displays -d DISABLED HEADLESS-1
+#    wayvnc -o HEADLESS-1 localhost 6666 &
+#    sleep 0.5
+#    vncviewer localhost::6666
+#}>/dev/null 2>&1'
+#
+#riverctl map normal Super+Shift G spawn '{
+#    killall vncviewer
+#    killall wayvnc
+#    way-displays -s DISABLED HEADLESS-1
+#}>/dev/null 2>&1'
 
 # mounting
 riverctl map normal Super B spawn "fuzzelmnt mount"
 riverctl map normal Super+Shift B spawn "fuzzelmnt umount"
 
 # yubikey
-riverctl map normal Super A spawn "yubikey-oath-dmenu --menu-cmd \"fuzzel -d -p 'otp > '\" --clipboard --notify"
+riverctl map normal Super A spawn "yubi-otp"
+
+# remove formatting from clipboard
+riverctl map normal Super+Control C spawn "wl-paste | wl-copy"
 
 # view management
 riverctl default-attach-mode below
@@ -141,10 +145,12 @@ riverctl map-pointer normal Super BTN_LEFT move-view
 riverctl map-pointer normal Super BTN_RIGHT resize-view
 riverctl rule-add -app-id "org.pulseaudio.pavucontrol" float
 riverctl rule-add -app-id "flameshot" float
+riverctl rule-add -app-id "blobdrop" float
+riverctl rule-add -app-id "pinentry-gtk" -title "rbw" float
 
 # window decoration
 riverctl rule-add ssd
-riverctl rule-add -title CALENDAR position $(( $(wlr-randr | grep current | grep -oE '[0-9]+x' | tr -d x) - 300)) 30
+#riverctl rule-add -title CALENDAR position $(( $(wlr-randr | grep current | grep -oE '[0-9]+x' | tr -d x) - 300)) 30
 
 # layout config
 launch -rl stacktile --inner-padding 5 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.65 --secondary-count 2
@@ -193,3 +199,5 @@ riverctl border-color-focused 0x63d1f4
 riverctl border-color-unfocused 0x000000
 riverctl border-color-urgent 0xffff00
 riverctl border-width 2
+
+notify-send "River" "Init executed successfully."

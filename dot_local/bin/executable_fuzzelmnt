@@ -29,6 +29,9 @@ elif [ "$1" = "umount" ]; then
     CHOICE="$(mounted_partitions | fuzzel -d -p "unmount > ")"
     DEVICE="$(echo $CHOICE | cut -d: -f1)"
 
-    udiskie-umount "$DEVICE"
-    notify-send "$DEVICE unounted."
+    if udiskie-umount "$DEVICE"; then
+        notify-send "$DEVICE unounted."
+    else
+        notify-send -u critical "Unable to unmount $DEVICE"
+    fi
 fi

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+xdg-open "$(fd -t f --changed-within 2hours . ~ /tmp -X ls -t | fuzzel -dw 100)"

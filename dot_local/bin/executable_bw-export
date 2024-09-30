@@ -1,0 +1,34 @@
+#!/bin/bash
+
+FOLDER_NAME="env-vars"
+
+if ! rbw unlock &>/dev/null; then
+  echo "Unlocking Bitwarden vault..."
+  rbw unlock
+fi
+
+# Match folder name without using a tab character in grep
+entries=$(rbw list --fields name,folder | grep "$FOLDER_NAME" | cut -f1)
+
+if [ -z "$entries" ]; then
+  return 1
+fi
+
+selected_entry=$(echo "$entries" | fuzzel -d --prompt "secret > ")
+
+if [ -z "$selected_entry" ]; then
+  return 1
+fi
+
+env_name=$(rbw get "$selected_entry" --field env_name)
+value=$(rbw get "$selected_entry" --field value)
+
+if [ -z "$env_name" ] || [ -z "$value" ]; then
+  echo "Error: Missing 'env_name' or 'value' field in Bitwarden entry '$selected_entry'."
+  return 1
+fi
+
+export "$env_name"="$value"
+echo "export $env_name"
+
+unset FOLDER_NAME entries selected_entry env_name value

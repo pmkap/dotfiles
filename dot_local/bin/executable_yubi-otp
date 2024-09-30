@@ -1,0 +1,2 @@
+#!/bin/sh
+yubikey-oath-dmenu --menu-cmd "fuzzel -d -p 'otp > '" --clipboard --notify

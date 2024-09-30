@@ -1,0 +1,66 @@
+#!/bin/bash
+set -euo pipefail
+
+TEMPFILE=$(mktemp)
+wl-paste > $TEMPFILE
+
+MIME_TYPE="$(xdg-mime query filetype $TEMPFILE)"
+
+case "$MIME_TYPE" in
+    image/png)
+        SUFFIX="png"
+        ;;
+    image/jpeg)
+        SUFFIX="jpg"
+        ;;
+    image/gif)
+        SUFFIX="gif"
+        ;;
+    image/svg+xml)
+        SUFFIX="svg"
+        ;;
+    text/plain)
+        SUFFIX="txt"
+        ;;
+    text/html)
+        SUFFIX="html"
+        ;;
+    application/pdf)
+        SUFFIX="pdf"
+        ;;
+    application/zip)
+        SUFFIX="zip"
+        ;;
+    application/x-tar)
+        SUFFIX="tar"
+        ;;
+    application/x-gzip)
+        SUFFIX="gz"
+        ;;
+    application/x-bzip2)
+        SUFFIX="bz2"
+        ;;
+    application/x-xz)
+        SUFFIX="xz"
+        ;;
+    application/json)
+        SUFFIX="json"
+        ;;
+    text/x-shellscript)
+        SUFFIX="sh"
+        ;;
+    text/x-python)
+        SUFFIX="py"
+        ;;
+    application/x-executable)
+        SUFFIX="bin"
+        ;;
+    *)
+        echo "Unsupported file type: $MIME_TYPE" >&2
+        exit 1
+        ;;
+esac
+
+mv "$TEMPFILE" "$TEMPFILE.$SUFFIX"
+
+blobdrop "$TEMPFILE.$SUFFIX"

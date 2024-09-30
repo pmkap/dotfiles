@@ -15,17 +15,17 @@ while getopts rlh arg; do
         h) echo "$HELP" && exit 0;;
     esac
 done
-shift $(($OPTIND - 1))
+shift $((OPTIND - 1))
 
 [ -z ${1+x} ] && echo "$HELP" && exit 1
 
-if [ ! -z $LOG ]; then
+if [ ! -z "$LOG" ]; then
     CMD="systemd-cat -t $1 $@ &"
 else
     CMD="$@ >/dev/null 2>&1 &"
 fi
 
-if [ ! -z $RESTART ]; then
+if [ ! -z "$RESTART" ]; then
     if killall $1 >/dev/null 2>&1; then
         echo "Stopped \`$1\`"
         echo "Starting \`$@\`"

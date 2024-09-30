@@ -49,6 +49,7 @@ alias ch="chezmoi"
 alias ssh="TERM=xterm-256color ssh"
 alias open="xdg-open"
 alias o="xdg-open"
+alias drop="blobdrop"
 
 certcheck() {
     curl -LIv $@ 2>&1 | grep "Server certificate" -A10

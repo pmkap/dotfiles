@@ -1,5 +1,5 @@
 # general
-export PATH=$HOME/.local/bin:$HOME/.local/bin/AppImages:$HOME/go/bin:$PATH
+export PATH=$HOME/.local/bin:$HOME/go/bin:$PATH
 export HOSTNAME="$(cat /etc/hostname)"
 
 # ssh
@@ -52,25 +52,10 @@ export FFF_TRASH=$HOME/.local/share/Trash/files
 # electron
 export ELECTRON_OZONE_PLATFORM_HINT=wayland
 
-# bemenu
-export BEMENU_OPTS="\
--H 26 \
---fn 'JetBrainsMono Nerd Font' \
---tb #000000 \
---tf #ffffff \
---fb #000000 \
---ff #ffffff \
---nb #000000 \
---nf #ffffff \
---hb #000000 \
---hf #63d1f4 \
---scb #000000 \
---scf #ffffff \
-"
-
 # start compositor
 if [ "$(tty)" = "/dev/tty1" ]; then
-    export WLR_BACKENDS=drm,libinput,headless
+    #export WLR_BACKENDS=drm,libinput,headless
     export XDG_CURRENT_DESKTOP=river
     systemd-cat -t river river
+    #$HOME/Software/river/zig-out/bin/river -log-level debug >.river.log 2>&1
 fi

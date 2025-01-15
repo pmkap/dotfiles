@@ -22,7 +22,7 @@ launch /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
 
 # keyboard
-riverctl keyboard-layout -options caps:swapescape eu
+riverctl keyboard-layout -options caps:escape_shifted_capslock eu
 
 # menu
 riverctl map normal Super D spawn "fuzzel --list-executables-in-path"
@@ -50,8 +50,8 @@ riverctl map normal Super+Shift S spawn '{
     if ps -C wf-recorder; then
         VID="$(pgrep -xa wf-recorder | cut -d" " -f4)"
         killall -SIGINT wf-recorder
-        wl-copy "$VID"
-        notify-send "Screen recording stopped." "Saved as $VID. Copied path to clipboard."
+        wl-copy < "$VID"
+        notify-send "Screen recording stopped." "Saved as $VID and copied to clipboard."
     else
         VID="$HOME/Pictures/Screenshots/rec_$(date +%Y%m%d_%Hh%Mm%S.%2Ns).mp4"
         if AREA="$(slurp)"; then
@@ -71,16 +71,9 @@ riverctl map normal Super+Shift V spawn '{
     fi
 }>/dev/null 2>&1'
 
-# mako silent mode
-riverctl map normal Super+Shift M spawn '{
-    if makoctl mode | grep silent; then
-        makoctl dismiss -a
-        makoctl mode -r silent
-    else
-        makoctl mode -a silent
-    fi
-    pkill -x waybar -RTMIN+1
-}>/dev/null 2>&1'
+# notifications
+riverctl map normal Super+Shift M spawn "swaync-client --toggle-dnd && pkill -x waybar -RTMIN+1"
+riverctl map normal Super+Shift N spawn "swaync-client --toggle-panel && pkill -x waybar -RTMIN+1"
 
 # virtual display via vnc
 #riverctl rule-add -title "WayVNC - TigerVNC" tags $((1 << 8))
@@ -148,12 +141,8 @@ riverctl rule-add -app-id "flameshot" float
 riverctl rule-add -app-id "blobdrop" float
 riverctl rule-add -app-id "pinentry-gtk" -title "rbw" float
 
-# window decoration
-riverctl rule-add ssd
-#riverctl rule-add -title CALENDAR position $(( $(wlr-randr | grep current | grep -oE '[0-9]+x' | tr -d x) - 300)) 30
-
 # layout config
-launch -rl stacktile --inner-padding 5 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.65 --secondary-count 2
+launch -rl stacktile --inner-padding 5 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.65 --secondary-count 1
 riverctl default-layout stacktile
 riverctl map -repeat normal Super H send-layout-cmd stacktile "primary_ratio -0.05"
 riverctl map -repeat normal Super L send-layout-cmd stacktile "primary_ratio +0.05"
@@ -200,4 +189,9 @@ riverctl border-color-unfocused 0x000000
 riverctl border-color-urgent 0xffff00
 riverctl border-width 2
 
+# window decoration
+riverctl rule-add ssd
+sleep .5 && riverctl rule-add -title CALENDAR position $(( $(wlr-randr | grep current | grep -oE '[0-9]+x' | tr -d x) - 300)) 30
+
 notify-send "River" "Init executed successfully."
+

@@ -1,5 +1,10 @@
 {
-  "output": ["eDP-1", "LG Electronics LG ULTRAWIDE 0x000195F3", "Samsung Electric Company LC34G55T H1AK500000"],
+  "output": [
+    "eDP-1",
+    "LG Electronics LG ULTRAWIDE 0x000195F3",
+    "Samsung Electric Company LC34G55T H1AK500000",
+    "Samsung Electric Company LC34G55T HNTX304609"
+  ],
 
   "modules-left": [
     "river/tags",
@@ -50,7 +55,7 @@
       "warning": 20,
       "critical": 10,
     },
-    "interval": 10,
+    "interval": 5,
   },
 
   "clock": {
@@ -103,7 +108,7 @@
   },
 
   "custom/mako": {
-    "exec": "makoctl mode | grep silent >/dev/null && echo ⛔",
+    "exec": "swaync-client --get-dnd | grep true >/dev/null && echo ⛔",
     "interval": "once",
     "signal": 1,
     "tooltip": false,

@@ -50,6 +50,7 @@ alias ssh="TERM=xterm-256color ssh"
 alias open="xdg-open"
 alias o="xdg-open"
 alias drop="blobdrop"
+alias pip="echo 'Disabled. Use \`uv pip\` instead.' && false"
 
 certcheck() {
     curl -LIv $@ 2>&1 | grep "Server certificate" -A10
@@ -78,6 +79,17 @@ osc7_cwd() {
 autoload -Uz add-zsh-hook
 add-zsh-hook -Uz chpwd osc7_cwd
 ###
+
+# uv completion fix
+eval "$(uv generate-shell-completion zsh)"
+_uv_run_mod() {
+    if [[ "$words[2]" == "run" && "$words[CURRENT]" != -* ]]; then
+        _arguments '*:filename:_files'
+    else
+        _uv "$@"
+    fi
+}
+compdef _uv_run_mod uv
 
 # prompt
 eval "$(starship init zsh)"

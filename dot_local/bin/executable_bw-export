@@ -2,7 +2,7 @@
 # export secrets from Bitwarden into the shell environment
 # usage: . bw-export
 
-FOLDER_NAME="env-vars"
+FOLDER_NAME="env"
 
 if ! rbw unlock &>/dev/null; then
   echo "Unlocking Bitwarden vault..."
@@ -15,17 +15,17 @@ if [ -z "$entries" ]; then
   return 1
 fi
 
-selected_entry=$(echo "$entries" | fuzzel -d --prompt "secret > ")
+selected_entry=$(echo "$entries" | fuzzel -d --prompt "var > ")
 
 if [ -z "$selected_entry" ]; then
   return 1
 fi
 
-env_name=$(rbw get "$selected_entry" --field env_name)
+env_name=$(rbw get "$selected_entry" --field name)
 value=$(rbw get "$selected_entry" --field value)
 
 if [ -z "$env_name" ] || [ -z "$value" ]; then
-  echo "Error: Missing 'env_name' or 'value' field in Bitwarden entry '$selected_entry'."
+  echo "Error: Missing 'name' or 'value' field in Bitwarden entry '$selected_entry'."
   return 1
 fi
 

@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+rbw unlock
+name="$(rbw list | fuzzel -d)"
+pw="$(rbw get "$name")"
+wl-copy "$pw"
+notify-send "Password for \"$name\" copied to clipboard."

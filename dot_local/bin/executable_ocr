@@ -1,3 +1,5 @@
 #!/bin/sh
 
-grim -g "$(slurp -d)" - | tesseract stdin stdout | wl-copy
+TEXT="$(grim -g "$(slurp -d)" - | tesseract stdin stdout)"
+echo "$TEXT" | wl-copy
+notify-send "$TEXT"

@@ -51,6 +51,7 @@ alias open="xdg-open"
 alias o="xdg-open"
 alias drop="blobdrop"
 alias pip="echo 'Disabled. Use \`uv pip\` instead.' && false"
+alias diff="git diff --no-index --"
 
 certcheck() {
     curl -LIv $@ 2>&1 | grep "Server certificate" -A10

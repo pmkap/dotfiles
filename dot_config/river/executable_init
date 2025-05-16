@@ -9,14 +9,15 @@ dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT
 WAYLOCK="waylock -fork-on-lock -ignore-empty-password"
 
 # autostart
-launch -l swayidle -w before-sleep \"$WAYLOCK\" timeout 600 \"$WAYLOCK\"
+launch -l swayidle -w before-sleep \"$WAYLOCK\" timeout 300 \"$WAYLOCK\"
 launch -rl waybar
 launch nm-applet --indicator
 launch -l way-displays
 launch wlsunset -l 47.6 -L 9.4
-launch mattermost-desktop
+launch com.mattermost.Desktop
 XDG_CURRENT_DESKTOP=sway launch flameshot
 launch /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+rbw-agent &
 
 # execute this file
 riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
@@ -25,7 +26,7 @@ riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
 riverctl keyboard-layout -options caps:escape_shifted_capslock eu
 
 # menu
-riverctl map normal Super D spawn "fuzzel --list-executables-in-path"
+riverctl map normal Super D spawn "fuzzel -w 60 --list-executables-in-path"
 
 # lock, suspend, etc.
 riverctl map normal Super Escape spawn "$WAYLOCK"
@@ -124,13 +125,14 @@ all_tags=$(( (1 << 9) - 1 ))
 riverctl map normal Super p set-focused-tags $all_tags
 riverctl map normal Super+Shift p set-view-tags $all_tags
 
-riverctl rule-add -app-id "Mattermost" tags $((1 << 7))
+riverctl rule-add -app-id "com.mattermost.Desktop" tags $((1 << 7))
 
 # output management
 riverctl map -repeat normal Super Period focus-output next
 riverctl map -repeat normal Super Comma focus-output previous
 riverctl map normal Super+Shift Period send-to-output -current-tags next
 riverctl map normal Super+Shift Comma send-to-output -current-tags previous
+riverctl set-cursor-warp on-output-change
 
 # floating management
 riverctl map normal Super Space toggle-float
@@ -139,7 +141,8 @@ riverctl map-pointer normal Super BTN_RIGHT resize-view
 riverctl rule-add -app-id "org.pulseaudio.pavucontrol" float
 riverctl rule-add -app-id "flameshot" float
 riverctl rule-add -app-id "blobdrop" float
-riverctl rule-add -app-id "pinentry-gtk" -title "rbw" float
+riverctl rule-add -app-id "Bitwarden" -title "Bitwarden" float
+riverctl rule-add -app-id "Pinentry-gtk" -title "rbw" float
 
 # layout config
 launch -rl stacktile --inner-padding 5 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.65 --secondary-count 1

@@ -51,8 +51,11 @@ export ELECTRON_OZONE_PLATFORM_HINT=wayland
 
 # start compositor
 if [ "$(tty)" = "/dev/tty1" ]; then
-    #export WLR_BACKENDS=drm,libinput,headless
     export XDG_CURRENT_DESKTOP=river
-    systemd-cat -t river river
-    #$HOME/Software/river/zig-out/bin/river -log-level debug >.river.log 2>&1
+    #export WLR_BACKENDS=drm,libinput,headless
+
+    [ -f .river.log ] && mv .river.log .river.log.1
+    $HOME/Software/river/zig-out/bin/river -log-level debug >.river.log 2>&1
+
+    #systemd-cat -t river river
 fi

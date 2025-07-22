@@ -80,3 +80,12 @@ window#waybar {
     color: #444444;
     margin: 0 20px 0px 20px;
 }
+
+#privacy-item {
+    color: #ff0000;
+    padding-left: 10px;
+}
+
+#custom-notifications {
+    margin-left: 50px;
+}

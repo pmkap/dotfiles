@@ -13,7 +13,8 @@
   ],
 
   "modules-center": [
-    "custom/mako",
+    "privacy",
+    "custom/notifications",
   ],
 
   "modules-right": [
@@ -108,7 +109,7 @@
     },
   },
 
-  "custom/mako": {
+  "custom/notifications": {
     "exec": "swaync-client --get-dnd | grep true >/dev/null && echo ⛔",
     "interval": "once",
     "signal": 1,

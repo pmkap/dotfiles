@@ -1,8 +1,8 @@
 # general
-export PATH=$HOME/.local/bin:$HOME/go/bin:$PATH
+export PATH=$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH
 export HOSTNAME="$(cat /etc/hostname)"
 
-# ssh
+# ssh agent
 export SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent.socket
 
 # keyboard
@@ -12,32 +12,23 @@ export XKB_DEFAULT_OPTIONS=caps:escape_shifted_capslock
 # default apps
 export VISUAL=nvim
 export EDITOR=nvim
-export BROWSER=librewolf
+export BROWSER=firefox
 export TERMINAL=foot
 
-# xdg base directory
+# xdg base directories
 export XDG_CONFIG_HOME=$HOME/.config
 export XDG_CACHE_HOME=$HOME/.cache
 export XDG_DATA_HOME=$HOME/.local/share
 export XDG_STATE_HOME=$HOME/.local/state
 
-# npm
-export NPM_CONFIG_USERCONFIG=$XDG_CONFIG_HOME/npm/npmrc
-
-# haskell stack
-export STACK_ROOT=$HOME/.local/share/stack
-
 # firefox
 export MOZ_ENABLE_WAYLAND=1
 
+# electron
+export ELECTRON_OZONE_PLATFORM_HINT=wayland
+
 # ipython
 export IPYTHONDIR=$HOME/.local/share/ipython
-
-# cargo
-export CARGO_HOME=$HOME/.cache/cargo
-
-# gpg
-export GNUPGHOME=$HOME/.config/gpg
 
 # less
 export LESSHISTFILE=$HOME/.local/share/less/lesshst
@@ -46,16 +37,13 @@ export LESSHISTFILE=$HOME/.local/share/less/lesshst
 export FFF_TRASH_CMD=trash-put
 export FFF_TRASH=$HOME/.local/share/Trash/files
 
-# electron
-export ELECTRON_OZONE_PLATFORM_HINT=wayland
-
 # start compositor
 if [ "$(tty)" = "/dev/tty1" ]; then
     export XDG_CURRENT_DESKTOP=river
-    #export WLR_BACKENDS=drm,libinput,headless
 
     [ -f .river.log ] && mv .river.log .river.log.1
-    $HOME/Software/river/zig-out/bin/river -log-level debug >.river.log 2>&1
 
-    #systemd-cat -t river river
+    ./Software/river/zig-out/bin/river -log-level debug >.river.log 2>&1
+
+    #river -log-level debug >.river.log 2>&1
 fi

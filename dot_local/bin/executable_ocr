@@ -2,4 +2,4 @@
 
 TEXT="$(grim -g "$(slurp -d)" - | tesseract stdin stdout)"
 echo "$TEXT" | wl-copy
-notify-send "$TEXT"
+notify-send "text copied to clipboard" "$TEXT"

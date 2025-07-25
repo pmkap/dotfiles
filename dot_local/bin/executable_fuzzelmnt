@@ -15,23 +15,25 @@ unmounted_partitions() {
     comm -23 <(all_partitions) <(mounted_partitions)
 }
 
-if [ "$1" = "mount" ]; then
-    CHOICE="$(unmounted_partitions | fuzzel -d -p "mount > ")"
-    DEVICE="$(echo $CHOICE | cut -d: -f1)"
-    LABEL="$(echo $CHOICE | cut -d: -f2 | cut -c2-)"
-    MOUNTPATH="\"/run/media/$USER/$LABEL\""
-
-    udiskie-mount "$DEVICE"
-    wl-copy "$MOUNTPATH"
-    notify-send "$DEVICE mounted to $MOUNTPATH. Copied to clipboard."
-
-elif [ "$1" = "umount" ]; then
+if [ "${1:-}" = "-u" ]; then
     CHOICE="$(mounted_partitions | fuzzel -d -p "unmount > ")"
-    DEVICE="$(echo $CHOICE | cut -d: -f1)"
+    [ -z "$CHOICE" ] && exit 1
+
+    DEVICE="${CHOICE%%:*}"
 
     if udiskie-umount "$DEVICE"; then
-        notify-send "$DEVICE unounted."
+        notify-send "mount" "$DEVICE unmounted."
     else
-        notify-send -u critical "Unable to unmount $DEVICE"
+        notify-send -u critical "mount" "Unable to unmount $DEVICE"
     fi
+else
+    CHOICE="$(unmounted_partitions | fuzzel -d -p "mount > ")"
+    [ -z "$CHOICE" ] && exit 1
+
+    DEVICE="${CHOICE%%:*}"
+
+    OUTPUT="$(udiskie-mount "$DEVICE")"
+    MOUNTPATH=${OUTPUT##* on }
+    wl-copy "$MOUNTPATH"
+    notify-send "mount" "$DEVICE mounted to $MOUNTPATH. Copied to clipboard."
 fi

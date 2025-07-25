@@ -1,7 +1,11 @@
 #!/bin/bash
 set -euo pipefail
+
+if [ "${1:-}" = "-p" ]; then
+    export RBW_PROFILE=personal
+fi
 rbw unlock
 name="$(rbw list | fuzzel -d)"
 pw="$(rbw get "$name")"
-wl-copy "$pw"
-notify-send "Password for \"$name\" copied to clipboard."
+wtype "$pw"
+#notify-send "Bitwarden" "Password for \"$name\" copied to clipboard."

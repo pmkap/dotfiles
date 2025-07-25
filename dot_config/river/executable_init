@@ -6,7 +6,7 @@ riverctl map normal Super Return spawn $TERMINAL
 
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP
 
-WAYLOCK="waylock -fork-on-lock -ignore-empty-password"
+WAYLOCK="waylock -fork-on-lock -ignore-empty-password -init-color 0xb16286"
 
 # autostart
 launch -l swayidle -w before-sleep \"$WAYLOCK\" timeout 300 \"$WAYLOCK\"
@@ -14,7 +14,7 @@ launch -rl waybar
 launch nm-applet --indicator
 launch -l way-displays
 launch wlsunset -l 47.6 -L 9.4
-launch com.mattermost.Desktop
+#launch com.mattermost.Desktop
 XDG_CURRENT_DESKTOP=sway launch flameshot
 launch /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 rbw-agent &
@@ -26,7 +26,7 @@ riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
 riverctl keyboard-layout -options caps:escape_shifted_capslock eu
 
 # menu
-riverctl map normal Super D spawn "fuzzel -w 60 --list-executables-in-path"
+riverctl map normal Super D spawn "fuzzel -w 80 --list-executables-in-path"
 
 # lock, suspend, etc.
 riverctl map normal Super Escape spawn "$WAYLOCK"
@@ -34,8 +34,8 @@ riverctl map normal Super+Shift+Control X exit
 riverctl map normal Super+Shift Z spawn "$WAYLOCK && systemctl suspend"
 riverctl map locked Super+Shift Z spawn "systemctl suspend"
 for mode in normal locked; do
-    riverctl map $mode Super+Shift+Control Z spawn "shutdown now"
-    riverctl map $mode Super+Alt+Shift+Control Z spawn "shutdown -r now"
+    riverctl map $mode Super+Shift+Control Z spawn "systemctl poweroff"
+    riverctl map $mode Super+Alt+Shift+Control Z spawn "systemctl reboot"
 done
 
 # waybar toggle
@@ -68,9 +68,11 @@ riverctl map normal Super+Shift V spawn '{
     if nmcli connection show wireguard | grep activated; then
         nmcli connection down wireguard
     else
-        nmcli connection up wireguard
+        err="$(nmcli connection up wireguard 2>&1)" && \
+        notify-send "Wireguard" "Connected" || \
+        notify-send -u critical "Wireguard connection failed" "$err"
     fi
-}>/dev/null 2>&1'
+} >/dev/null 2>&1'
 
 # notifications
 riverctl map normal Super+Shift M spawn "swaync-client --toggle-dnd && pkill -x waybar -RTMIN+1"
@@ -84,23 +86,26 @@ riverctl map normal Super+Shift N spawn "swaync-client --toggle-panel && pkill -
 #    wayvnc -o HEADLESS-1 localhost 6666 &
 #    sleep 0.5
 #    vncviewer localhost::6666
-#}>/dev/null 2>&1'
+#} >/dev/null 2>&1'
 #
 #riverctl map normal Super+Shift G spawn '{
 #    killall vncviewer
 #    killall wayvnc
 #    way-displays -s DISABLED HEADLESS-1
-#}>/dev/null 2>&1'
+#} >/dev/null 2>&1'
 
 # mounting
-riverctl map normal Super B spawn "fuzzelmnt mount"
-riverctl map normal Super+Shift B spawn "fuzzelmnt umount"
+riverctl map normal Super B spawn "fuzzelmnt"
+riverctl map normal Super+Shift B spawn "fuzzelmnt -u"
 
 # yubikey
-riverctl map normal Super A spawn "yubi-otp"
+riverctl map normal Super A spawn "yubikey-oath-dmenu --menu-cmd \"fuzzel -d -p 'otp > '\" --clipboard --notify"
 
 # remove formatting from clipboard
 riverctl map normal Super+Control C spawn "wl-paste | wl-copy"
+
+riverctl map normal Super+Alt C spawn "drop-clipboard"
+riverctl map normal Super+Alt F spawn "drop-recent-files"
 
 # view management
 riverctl default-attach-mode below
@@ -142,7 +147,7 @@ riverctl rule-add -app-id "org.pulseaudio.pavucontrol" float
 riverctl rule-add -app-id "flameshot" float
 riverctl rule-add -app-id "blobdrop" float
 riverctl rule-add -app-id "Bitwarden" -title "Bitwarden" float
-riverctl rule-add -app-id "Pinentry-gtk" -title "rbw" float
+riverctl rule-add -app-id "Pinentry-gtk" float
 
 # layout config
 launch -rl stacktile --inner-padding 5 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.65 --secondary-count 1

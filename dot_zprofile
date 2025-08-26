@@ -32,12 +32,3 @@ export IPYTHONDIR=$HOME/.local/share/ipython
 
 # less
 export LESSHISTFILE=$HOME/.local/share/less/lesshst
-
-# start compositor
-if [ "$(tty)" = "/dev/tty1" ]; then
-    export XDG_CURRENT_DESKTOP=river
-
-    [ -f .river.log ] && mv .river.log .river.log.1
-
-    ./Software/river/zig-out/bin/river -log-level debug >.river.log 2>&1
-fi

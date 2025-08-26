@@ -33,10 +33,6 @@ export IPYTHONDIR=$HOME/.local/share/ipython
 # less
 export LESSHISTFILE=$HOME/.local/share/less/lesshst
 
-# fff
-export FFF_TRASH_CMD=trash-put
-export FFF_TRASH=$HOME/.local/share/Trash/files
-
 # start compositor
 if [ "$(tty)" = "/dev/tty1" ]; then
     export XDG_CURRENT_DESKTOP=river
@@ -44,6 +40,4 @@ if [ "$(tty)" = "/dev/tty1" ]; then
     [ -f .river.log ] && mv .river.log .river.log.1
 
     ./Software/river/zig-out/bin/river -log-level debug >.river.log 2>&1
-
-    #river -log-level debug >.river.log 2>&1
 fi

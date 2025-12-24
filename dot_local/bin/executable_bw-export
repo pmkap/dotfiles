@@ -1,6 +1,6 @@
 #!/bin/bash
 # export secrets from Bitwarden into the shell environment
-# usage: . bw-export
+# usage: . bw-export or source bw-export
 
 FOLDER_NAME="env"
 

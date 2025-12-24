@@ -4,4 +4,4 @@ export XDG_CURRENT_DESKTOP=river
 
 [ -f .river.log ] && mv .river.log .river.log.1
 
-exec ./Software/river/zig-out/bin/river -log-level debug >.river.log 2>&1
+exec river -log-level debug >.river.log 2>&1

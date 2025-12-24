@@ -57,11 +57,6 @@ certcheck() {
     curl -LIv $@ 2>&1 | grep "Server certificate" -A10
 }
 
-f() {
-    fff "$@"
-    cd "$(cat "${XDG_CACHE_HOME:=${HOME}/.cache}/fff/.fff_d")"
-}
-
 ### OSC sequences for foot ###
 # https://codeberg.org/dnkl/foot/wiki#how-to-configure-my-shell-to-emit-the-osc-7-escape-sequence
 _urlencode() {

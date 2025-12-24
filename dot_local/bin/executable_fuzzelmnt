@@ -34,6 +34,6 @@ else
 
     OUTPUT="$(udiskie-mount "$DEVICE")"
     MOUNTPATH=${OUTPUT##* on }
-    wl-copy "$MOUNTPATH"
+    wl-copy "\"$MOUNTPATH\""
     notify-send "mount" "$DEVICE mounted to $MOUNTPATH. Copied to clipboard."
 fi

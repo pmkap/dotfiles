@@ -1,0 +1,2 @@
+[binds]
+<Ctrl+d> = exec trash-put "$imv_current_file"; close

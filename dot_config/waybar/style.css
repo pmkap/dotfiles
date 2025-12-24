@@ -55,6 +55,7 @@ window#waybar {
     padding: 0 0 0 10px;
 }
 
+#temperature,
 #pulseaudio,
 #clock,
 #cpu,
@@ -64,12 +65,14 @@ window#waybar {
     color: #ffffff;
 }
 
+#temperature.warning,
 #cpu.warning,
 #memory.warning,
 #battery.warning {
     color: #ffff00;
 }
 
+#temperature.critical,
 #cpu.critical,
 #memory.critical,
 #battery.critical {
@@ -83,9 +86,8 @@ window#waybar {
 
 #privacy-item {
     color: #ff0000;
-    padding-left: 10px;
 }
 
 #custom-notifications {
-    margin-left: 50px;
+    margin-left: 20px;
 }

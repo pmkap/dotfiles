@@ -4,7 +4,8 @@
     "LG Electronics LG ULTRAWIDE 0x000195F3",
     "Samsung Electric Company LC34G55T H1AK500000",
     "Samsung Electric Company LC34G55T HNTX304609",
-    "Dell Inc. DELL SE2422HX JDZ5XB3"
+    "Dell Inc. DELL SE2422HX JDZ5XB3",
+    "Lenovo Group Limited R34w-30 URW16HDK",
   ],
 
   "modules-left": [
@@ -12,15 +13,16 @@
     "river/mode",
   ],
 
-  "modules-center": [
+  "modules-right": [
     "privacy",
     "custom/notifications",
-  ],
-
-  "modules-right": [
+    "custom/separator",
+    "temperature",
+    "custom/separator",
+    "cpu",
+    "custom/separator",
     "memory",
     "custom/separator",
-    //"cpu",
     "network",
     "custom/separator",
     "battery",
@@ -91,17 +93,23 @@
     "on-click": "pavucontrol",
   },
 
-  //"cpu": {
-  //  "format": "CPU {usage:3}%",
-  //  "interval": 1,
-  //  "states": {
-  //    "warning": 50,
-  //    "critical": 90,
-  //  },
-  //},
+  "cpu": {
+    "format": "C {usage:2}%",
+    "interval": 1,
+    "states": {
+      "warning": 50,
+      "critical": 90,
+    },
+  },
+
+  "temperature": {
+    "format": "T {}°C",
+    "warning-threshold": 80,
+    "critical-threshold": 90,
+  },
 
   "memory": {
-    "format": "MEM {}%",
+    "format": "M {:2}%",
     "interval": 1,
     "states": {
       "warning": 50,

@@ -6,7 +6,7 @@ bindkey "^U" backward-kill-line
 
 # completion
 autoload -Uz compinit promptinit
-compinit -d $HOME/.local/share/zsh/zcompdump
+compinit -C -d $HOME/.local/share/zsh/zcompdump
 promptinit
 setopt COMPLETE_ALIASES
 zstyle ':completion:*' menu select
@@ -19,6 +19,8 @@ SAVEHIST=100000000
 setopt INC_APPEND_HISTORY
 setopt HIST_IGNORE_SPACE
 setopt EXTENDED_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_FIND_NO_DUPS
 
 # history search
 autoload -U history-search-end
@@ -45,7 +47,6 @@ alias cp="cp -i"
 alias tar="bsdtar"
 alias lsblkk="lsblk -o NAME,RM,RO,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS"
 alias wget="wget --hsts-file=$HOME/.local/share/wget/wget-hsts"
-alias ch="chezmoi"
 alias ssh="TERM=xterm-256color ssh"
 alias open="xdg-open"
 alias o="xdg-open"
@@ -53,28 +54,37 @@ alias drop="blobdrop"
 alias pip="echo 'Disabled. Use \`uv pip\` instead.' && false"
 alias diff="git diff --no-index --"
 
+# functions
+ch() { command chezmoi "$@"; }
+compdef ch=chezmoi
+
 certcheck() {
     curl -LIv $@ 2>&1 | grep "Server certificate" -A10
 }
 
-### OSC sequences for foot ###
-# https://codeberg.org/dnkl/foot/wiki#how-to-configure-my-shell-to-emit-the-osc-7-escape-sequence
-_urlencode() {
-    local length="${#1}"
-    for (( i = 0; i < length; i++ )); do
-        local c="${1:$i:1}"
-        case $c in
-            %) printf '%%%02X' "'$c" ;;
-            *) printf "%s" "$c" ;;
-        esac
-    done
-}
-osc7_cwd() {
-    printf '\e]7;file://%s%s\e\\' "$HOSTNAME" "$(_urlencode "$PWD")"
-}
-autoload -Uz add-zsh-hook
-add-zsh-hook -Uz chpwd osc7_cwd
-###
+# OSC sequences for foot
+# https://codeberg.org/dnkl/foot/wiki#shell-integration
+if [[ "$TERM" == foot* ]]; then
+    osc7-pwd() {
+        emulate -L zsh # also sets localoptions for us
+        setopt extendedglob
+        local LC_ALL=C
+        printf '\e]7;file://%s%s\e\' $HOST ${PWD//(#m)([^@-Za-z&-;_~])/%${(l:2::0:)$(([##16]#MATCH))}}
+    }
+    chpwd-osc7-pwd() {
+        (( ZSH_SUBSHELL )) || osc7-pwd
+    }
+    add-zsh-hook -Uz chpwd chpwd-osc7-pwd
+    precmd() {
+        print -Pn "\e]133;A\e\\"
+        if ! builtin zle; then
+            print -n "\e]133;D\e\\"
+        fi
+    }
+    preexec() {
+        print -n "\e]133;C\e\\"
+    }
+fi
 
 # uv completion fix
 eval "$(uv generate-shell-completion zsh)"

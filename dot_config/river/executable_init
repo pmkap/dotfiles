@@ -16,7 +16,6 @@ launch nm-applet --indicator
 launch blueman-applet
 launch -l way-displays
 launch wlsunset -l 47.6 -L 9.4
-XDG_CURRENT_DESKTOP=sway launch flameshot
 launch /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 launch poweralertd
 launch rbw-agent
@@ -28,7 +27,7 @@ riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
 riverctl keyboard-layout -options caps:escape_shifted_capslock eu
 
 # menu
-riverctl map normal Super D spawn "fuzzel -w 80 --list-executables-in-path"
+riverctl map normal Super D spawn "fuzzel --list-executables-in-path"
 
 # power management
 riverctl map normal Super Escape spawn "$WAYLOCK"
@@ -44,8 +43,8 @@ done
 riverctl map normal Super+Control B spawn "killall -SIGUSR1 waybar"
 
 # screenshot
-riverctl map normal Super S spawn "XDG_CURRENT_DESKTOP=sway flameshot gui"
-riverctl map normal None Print spawn "XDG_CURRENT_DESKTOP=sway flameshot gui"
+riverctl map normal Super S spawn "flameshot gui"
+riverctl map normal None Print spawn "flameshot gui"
 
 # screen recording
 riverctl map normal Super+Shift S spawn '{

@@ -1,9 +1,9 @@
 # general
-export PATH=$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH"
 export HOSTNAME="$(cat /etc/hostname)"
 
 # ssh agent
-export SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent.socket
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
 # keyboard
 export XKB_DEFAULT_LAYOUT=eu
@@ -16,10 +16,10 @@ export BROWSER=firefox
 export TERMINAL=foot
 
 # xdg base directories
-export XDG_CONFIG_HOME=$HOME/.config
-export XDG_CACHE_HOME=$HOME/.cache
-export XDG_DATA_HOME=$HOME/.local/share
-export XDG_STATE_HOME=$HOME/.local/state
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
 
 # firefox
 export MOZ_ENABLE_WAYLAND=1

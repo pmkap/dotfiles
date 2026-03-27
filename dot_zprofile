@@ -7,7 +7,7 @@ export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
 # keyboard
 export XKB_DEFAULT_LAYOUT=eu
-export XKB_DEFAULT_OPTIONS=caps:escape_shifted_capslock
+export XKB_DEFAULT_OPTIONS=caps:escape_shifted_capslock,compose:rwin,compose:menu
 
 # default apps
 export VISUAL=nvim

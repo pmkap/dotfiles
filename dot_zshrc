@@ -59,7 +59,11 @@ ch() { command chezmoi "$@"; }
 compdef ch=chezmoi
 
 certcheck() {
-    curl -LIv $@ 2>&1 | grep "Server certificate" -A10
+    command curl -LIv $@ 2>&1 | grep "Server certificate" -A10
+}
+
+memx() {
+    command ps -eo comm,rss --no-headers | awk '{a[$1]+=$2} END{for(k in a) printf "%8.1f MiB  %s\n", a[k]/1024, k}' | sort -nr | head
 }
 
 # OSC sequences for foot

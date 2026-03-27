@@ -2,12 +2,11 @@
 set -eu
 
 # terminal
-riverctl map normal Super Return spawn $TERMINAL
+riverctl map normal Super Return spawn 'foot -T "foot-$(tr -dc 0-9a-z </dev/urandom | head -c 5)"'
 
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP
 
-#WAYLOCK="waylock -fork-on-lock -ignore-empty-password -init-color 0xcba6f7"
-WAYLOCK="swaylock"
+WAYLOCK="waylock -fork-on-lock -ignore-empty-password -init-color 0xcba6f7"
 
 # autostart
 launch -rl swayidle -w before-sleep \"$WAYLOCK\" timeout 300 \"$WAYLOCK\"
@@ -23,16 +22,17 @@ launch rbw-agent
 # execute this file
 riverctl map normal Super+Shift C spawn "$HOME/.config/river/init"
 
-# keyboard
-riverctl keyboard-layout -options caps:escape_shifted_capslock eu
+# keyboard and mouse
+riverctl keyboard-layout -options caps:escape_shifted_capslock,compose:rwin,compose:menu eu
+riverctl input "*" middle-emulation enabled
 
 # menu
 riverctl map normal Super D spawn "fuzzel --list-executables-in-path"
 
 # power management
 riverctl map normal Super Escape spawn "$WAYLOCK"
-riverctl map normal Super+Shift+Control X exit
-riverctl map normal Super+Shift Z spawn "systemctl suspend"
+riverctl map normal Control+Alt Delete exit
+riverctl map normal Super+Shift Z spawn "$WAYLOCK && systemctl suspend"
 riverctl map locked Super+Shift Z spawn "systemctl suspend"
 for mode in normal locked; do
     riverctl map $mode Super+Shift+Control Z spawn "systemctl poweroff"
@@ -123,12 +123,12 @@ riverctl map normal Super Space toggle-float
 riverctl map-pointer normal Super BTN_LEFT move-view
 riverctl map-pointer normal Super BTN_RIGHT resize-view
 riverctl rule-add -app-id "org.pulseaudio.pavucontrol" float
-riverctl rule-add -app-id "flameshot" float
+riverctl rule-add -title "flameshot-pin" float
 riverctl rule-add -app-id "blobdrop" float
 riverctl rule-add -app-id "Pinentry-gtk" float
 
 # layout config
-launch -rl stacktile --inner-padding 5 --outer-padding 0 --per-tag-config --drop-empty-configs --secondary-ratio 0.65 --secondary-count 1
+launch -rl stacktile --inner-padding 5 --outer-padding 0 --per-tag-config --drop-empty-configs --primary-ratio 0.6 --secondary-ratio 0.65 --secondary-count 1
 riverctl default-layout stacktile
 riverctl map -repeat normal Super H send-layout-cmd stacktile "primary_ratio -0.05"
 riverctl map -repeat normal Super L send-layout-cmd stacktile "primary_ratio +0.05"
@@ -142,13 +142,16 @@ riverctl map normal Super+Shift F spawn "riverctl send-layout-cmd stacktile 'all
 riverctl map normal Super+Shift+Control F spawn "riverctl send-layout-cmd stacktile 'all_primary false' && riverctl send-layout-cmd stacktile 'primary_sublayout columns'"
 
 # controls
+VOL_DEC='wpctl set-volume @DEFAULT_SINK@ --limit 1.5 5%-'
+VOL_INC='wpctl set-mute @DEFAULT_SINK@ 0 && wpctl set-volume @DEFAULT_SINK@ --limit 1.5 5%+'
+VOL_TOGGLE='wpctl set-mute @DEFAULT_SINK@ toggle'
 for mode in normal locked; do
-    riverctl map -repeat $mode Super Bracketleft spawn "pamixer --allow-boost --set-limit 150 -d 5"
-    riverctl map -repeat $mode Super Bracketright spawn "pamixer --unmute --allow-boost --set-limit 150 -i 5"
-    riverctl map $mode Super M spawn "pamixer --toggle-mute"
-    riverctl map -repeat $mode None XF86AudioLowerVolume spawn "pamixer --allow-boost --set-limit 150 -d 5"
-    riverctl map -repeat $mode None XF86AudioRaiseVolume spawn "pamixer --unmute --allow-boost --set-limit 150 -i 5"
-    riverctl map $mode None XF86AudioMute spawn "pamixer --toggle-mute"
+    riverctl map -repeat $mode Super Bracketleft spawn "$VOL_DEC"
+    riverctl map -repeat $mode Super Bracketright spawn "$VOL_INC"
+    riverctl map $mode Super M spawn "$VOL_TOGGLE"
+    riverctl map -repeat $mode None XF86AudioLowerVolume spawn "$VOL_DEC"
+    riverctl map -repeat $mode None XF86AudioRaiseVolume spawn "$VOL_INC"
+    riverctl map $mode None XF86AudioMute spawn "$VOL_TOGGLE"
     riverctl map -repeat $mode None XF86MonBrightnessDown spawn "brightnessctl s 5%-"
     riverctl map -repeat $mode None XF86MonBrightnessUp spawn "brightnessctl s +5%"
     riverctl map -repeat $mode Super+Shift Bracketleft spawn "brightnessctl s 5%-"
@@ -158,7 +161,6 @@ done
 # disable Super when not used as modifier to prevent opening of the menu on
 # nested Windows or GNOME sessions
 riverctl map normal None Super_L spawn ""
-riverctl map normal None Super_R spawn ""
 
 # passthrough mode
 riverctl declare-mode passthrough

@@ -1,0 +1,210 @@
+#!/bin/sh
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP
+
+argenctl binding set normal Super Return exec "foot"
+
+# execute this file
+argenctl binding set normal Super+Shift C exec "$0"
+
+# menu
+argenctl binding set normal Super D exec "fuzzel" "--list-executables-in-path"
+
+# power management
+WAYLOCK="waylock -fork-on-lock -ignore-empty-password -init-color 0xcba6f7"
+argenctl binding set normal Super Escape sh "$WAYLOCK"
+argenctl binding set normal Super+Shift Z sh "$WAYLOCK && systemctl suspend"
+argenctl binding set locked Super+Shift Z exec "systemctl" "suspend"
+for mode in normal locked; do
+    argenctl binding set $mode Super+Shift+Control Z exec "systemctl" "poweroff"
+    argenctl binding set $mode Super+Alt+Shift+Control Z exec "systemctl" "reboot"
+done
+
+argenctl binding set normal Super J window focus next
+argenctl binding set normal Super K window focus prev
+argenctl binding set normal Super+Shift J window swap next
+argenctl binding set normal Super+Shift K window swap prev
+
+argenctl binding set normal Super F window float
+argenctl binding set normal Super+Shift F window fullscreen
+
+argenctl binding set normal Super X window close
+argenctl binding set normal Super+Shift X window detach
+
+argenctl binding set normal Super Period output focus next
+argenctl binding set normal Super Comma output focus prev
+
+argenctl binding set normal Super+Shift Period window send next
+argenctl binding set normal Super+Shift Comma window send prev
+
+argenctl binding set --repeat normal Super H layout set primary-ratio -0.05
+argenctl binding set --repeat normal Super L layout set primary-ratio +0.05
+argenctl binding set --repeat normal Super+Control K layout set secondary-ratio -0.05
+argenctl binding set --repeat normal Super+Control J layout set secondary-ratio +0.05
+
+argenctl pointer-binding set normal Super BTN_LEFT move-window
+argenctl pointer-binding set normal Super BTN_RIGHT resize-window
+
+argenctl binding set normal Super+Shift+Control X context close
+
+# rules
+argenctl rule add float --title "flameshot-pin"
+argenctl rule add float --app-id "org.pulseaudio.pavucontrol"
+argenctl rule add float --app-id "blobdrop"
+argenctl rule add float --app-id "Pinentry-gtk"
+
+# Create new context and open a browser window
+argenctl binding set normal Super+Alt Return sh "argenctl context new && firefox"
+
+# Switch contexts interactively
+argenctl binding set normal Super Space sh 'argenctl context switch "$(argenctl context list | fuzzel -d)"'
+argenctl binding set normal Super Tab context switch --last
+
+# Create new context interactively
+argenctl binding set normal Super+Shift Space sh '
+    set -eu
+    prompt="$(fuzzel -dl0 -p"new > ")"
+    argenctl context new "$prompt"
+'
+
+# Rename current context interactively
+argenctl binding set normal Super+Control Space sh '
+    set -eu
+    prompt="$(fuzzel -dl0 -p"rename > ")"
+    argenctl context rename "$prompt"
+'
+
+# Assign currently focused window to be toggled with Super U
+argenctl binding set normal Super+Shift U sh '
+    set -eu
+    window_id=$(argenctl window list --json | jq -r ".[] | select(.focused) | .id")
+    argenctl binding set normal Super U window toggle $window_id
+'
+# Same with Super I and Super O
+argenctl binding set normal Super+Shift I sh '
+    set -eu
+    window_id=$(argenctl window list --json | jq -r ".[] | select(.focused) | .id")
+    argenctl binding set normal Super I window toggle $window_id
+'
+argenctl binding set normal Super+Shift O sh '
+    set -eu
+    window_id=$(argenctl window list --json | jq -r ".[] | select(.focused) | .id")
+    argenctl binding set normal Super O window toggle $window_id
+'
+
+# Attach window interactively
+argenctl binding set normal Super+Shift D sh '
+    set -eu
+    id=$(argenctl window list | fuzzel -d --with-nth 2 --accept-nth 1)
+    argenctl window attach "$id"
+'
+
+# Adopt all orphans
+argenctl binding set normal Super+Control D sh '
+    argenctl window list --json | jq -r ".[] | select(.contexts | length == 0) | .id" | while read -r id; do
+        argenctl window attach "$id"
+    done
+'
+
+# waybar toggle
+argenctl binding set normal Super+Control B exec "killall" "-SIGUSR1" "waybar"
+
+# screenshots
+argenctl binding set normal Super S exec "flameshot" "gui"
+argenctl binding set normal None Print exec "flameshot" "gui"
+
+# start and stop screen recording
+# cancel slurp selection to record fullscreen
+argenctl binding set normal Super+Shift S sh '
+    set -eu
+    if ps -C wf-recorder >/dev/null 2>&1; then
+        VID="$(pgrep -xa wf-recorder | cut -d" " -f4)"
+        killall -SIGINT wf-recorder
+        wl-copy < "$VID"
+        notify-send "Screen recording stopped." "Saved as $VID and copied to clipboard."
+    else
+        VID="$HOME/Pictures/Screenshots/rec_$(date +%Y%m%d_%Hh%Mm%S.%2Ns).mp4"
+        if AREA="$(slurp)"; then
+            wf-recorder -f "$VID" -g "$AREA"
+        else
+            wf-recorder -f "$VID"
+        fi
+    fi
+'
+
+# VPN
+argenctl binding set normal Super+Shift V sh '{
+    if nmcli connection show wireguard | grep -q activated; then
+        nmcli connection down wireguard
+    else
+        err="$(nmcli connection up wireguard 2>&1)" && \
+        notify-send "Wireguard" "Connected" || \
+        notify-send -u critical "Wireguard connection failed" "$err"
+    fi
+} >/dev/null 2>&1'
+
+# notifications
+argenctl binding set normal Super+Shift M sh "swaync-client --toggle-dnd && pkill -x waybar -RTMIN+1"
+argenctl binding set normal Super+Shift N sh "swaync-client --toggle-panel && pkill -x waybar -RTMIN+1"
+
+# mounting
+argenctl binding set normal Super B exec "fuzzelmnt"
+argenctl binding set normal Super+Shift B exec "fuzzelmnt" "-u"
+
+# yubikey
+argenctl binding set normal Super A exec "yubikey-oath-dmenu" "--menu-cmd" "fuzzel -d -p 'otp > '" "--clipboard" "--notify"
+
+argenctl binding set normal Super+Alt C exec "drop-clipboard"
+argenctl binding set normal Super+Alt F exec "drop-recent-files"
+
+# controls
+VOL_DEC='wpctl set-volume @DEFAULT_SINK@ --limit 1.5 5%-'
+VOL_INC='wpctl set-mute @DEFAULT_SINK@ 0 && wpctl set-volume @DEFAULT_SINK@ --limit 1.5 5%+'
+VOL_TOGGLE='wpctl set-mute @DEFAULT_SINK@ toggle'
+for mode in normal locked; do
+    argenctl binding set --repeat $mode Super Bracketleft sh "$VOL_DEC"
+    argenctl binding set --repeat $mode Super Bracketright sh "$VOL_INC"
+    argenctl binding set --repeat $mode None XF86AudioLowerVolume sh "$VOL_DEC"
+    argenctl binding set --repeat $mode None XF86AudioRaiseVolume sh "$VOL_INC"
+    argenctl binding set $mode Super M sh "$VOL_TOGGLE"
+    argenctl binding set $mode None XF86AudioMute sh "$VOL_TOGGLE"
+    argenctl binding set --repeat $mode None XF86MonBrightnessDown sh "brightnessctl s 5%-"
+    argenctl binding set --repeat $mode None XF86MonBrightnessUp sh "brightnessctl s +5%"
+    argenctl binding set --repeat $mode Super+Shift Bracketleft sh "brightnessctl s 5%-"
+    argenctl binding set --repeat $mode Super+Shift Bracketright sh "brightnessctl s +5%"
+done
+
+# passthrough mode
+argenctl mode declare passthrough
+argenctl binding set normal Super Grave mode enter passthrough
+argenctl binding set passthrough Super Grave mode enter normal
+
+# Keyboard repeat rate and delay
+argenctl config set repeat 75 175
+
+# autostart
+start() {
+    name="$(basename "$1")"
+    unit="argen-$name"
+    systemctl --user reset-failed "$unit" >/dev/null 2>&1 || true
+    echo Starting "$@"
+    systemd-run --user --unit "$unit" "$@" || true
+}
+restart() {
+    name="$(basename "$1")"
+    unit="argen-$name"
+    echo Stopping "$name"
+    systemctl --user stop "$unit" || true
+    systemctl --user reset-failed "$unit" >/dev/null 2>&1 || true
+    echo Starting "$@"
+    systemd-run --user --unit "$unit" "$@" || true
+}
+
+start way-displays
+restart swayidle -w before-sleep "$WAYLOCK" timeout 300 "$WAYLOCK"
+restart waybar
+start wlsunset -l 47.6 -L 9.4
+start /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+start /opt/KopiaUI/kopia-ui
+start poweralertd
+start blueman-applet
+start nm-applet --indicator

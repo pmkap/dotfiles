@@ -1,0 +1,8 @@
+#!/bin/sh
+
+flock -n /tmp/argen.lock sh -c 'while true; do
+ [ -f .argen.log.1 ] && mv .argen.log.1 .argen.log.2
+ [ -f .argen.log ] && mv .argen.log .argen.log.1
+ argen --log-level debug >.argen.log 2>&1
+ sleep 1
+done'

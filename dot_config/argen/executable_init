@@ -51,6 +51,7 @@ argenctl rule add float --title "flameshot-pin"
 argenctl rule add float --app-id "org.pulseaudio.pavucontrol"
 argenctl rule add float --app-id "blobdrop"
 argenctl rule add float --app-id "Pinentry-gtk"
+argenctl rule add float --app-id "soffice" --title "Text Import - *"
 
 # Create new context and open a browser window
 argenctl binding set normal Super+Alt Return sh "argenctl context new && firefox"

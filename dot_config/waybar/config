@@ -9,11 +9,6 @@
     "Lenovo Group Limited R34w-30 URW16HDK",
   ],
 
-  "modules-left": [
-    "river/tags",
-    "river/mode",
-  ],
-
   "modules-right": [
     "privacy",
     "custom/notifications",
@@ -39,11 +34,6 @@
       "format": "|",
       "interval": "once",
       "tooltip": false
-  },
-
-  "river/tags": {
-    "num-tags": 9,
-    "tag-labels": ["q", "w", "e", "r", "t", "y", "u", "i", "o"],
   },
 
   "tray": {

@@ -1,6 +1,4 @@
 #!/bin/sh
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP
-
 argenctl binding set normal Super Return exec "foot"
 
 # execute this file
@@ -18,6 +16,7 @@ for mode in normal locked; do
     argenctl binding set $mode Super+Shift+Control Z exec "systemctl" "poweroff"
     argenctl binding set $mode Super+Alt+Shift+Control Z exec "systemctl" "reboot"
 done
+argenctl binding set normal Alt+Control Delete exec uwsm stop
 
 argenctl binding set normal Super J window focus next
 argenctl binding set normal Super K window focus prev

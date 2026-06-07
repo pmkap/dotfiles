@@ -1,8 +1,0 @@
-#!/usr/bin/zsh -l
-
-export XDG_CURRENT_DESKTOP=river
-
-[ -f .river.log.1 ] && mv .river.log.1 .river.log.2
-[ -f .river.log ] && mv .river.log .river.log.1
-
-river -c argen_loop -log-level debug >.river.log 2>&1

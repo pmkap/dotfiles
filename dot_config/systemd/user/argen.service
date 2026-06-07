@@ -1,0 +1,13 @@
+[Unit]
+Description=Argen window manager for the river Wayland compositor
+After=wayland-session@river.target
+Requires=wayland-session@river.target
+
+[Service]
+Environment=ARGEN_LOG_LEVEL=debug
+ExecStart=/home/pkaplan/.local/bin/argen
+Restart=always
+KillMode=process
+
+[Install]
+WantedBy=wayland-session@river.target

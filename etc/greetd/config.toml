@@ -2,9 +2,9 @@
 vt = 1
 
 [default_session]
-command = "agreety --cmd .local/bin/start_compositor"
+command = "agreety --cmd 'uwsm start -g -1 -- river -log-level debug -c \"uwsm finalize\"'"
 user = "greeter"
 
 [initial_session]
-command = ".local/bin/start_compositor"
+command = "uwsm start -g -1 -- river -log-level debug -c 'uwsm finalize'"
 user = "pkaplan"

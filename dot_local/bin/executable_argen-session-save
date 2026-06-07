@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/argen"
+mkdir -p "$STATE_DIR"
+STATE="$STATE_DIR/session.json"
+
+contexts=$(argenctl context list --json)
+focused_id=$(argenctl window list --json | jq -r 'map(select(.focused == true)) | first | .id // empty')
+
+jq -n \
+    --argjson contexts "$contexts" \
+    --arg focused_window "$focused_id" \
+    '{"contexts": $contexts, "focused_window": $focused_window}' > "$STATE"
+
+echo "session saved to $STATE"

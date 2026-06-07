@@ -1,0 +1,35 @@
+#!/bin/sh
+set -eu
+
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/argen/session.json"
+[ -f "$STATE" ] || { echo "no saved session at $STATE"; exit 1; }
+
+PREV_CTXS="$(argenctl context list)"
+
+# re-create contexts
+jq -r '.contexts[].name' "$STATE" | while read -r name; do
+    argenctl context new "$name"
+done
+
+# close previous contexts, orphans all windows
+echo "$PREV_CTXS" | while read -r name; do
+    argenctl context close "$name"
+done
+
+# attach windows in layout order per context
+jq -c '.contexts[]' "$STATE" | while read -r ctx; do
+    name=$(printf '%s' "$ctx" | jq -r '.name')
+    argenctl context switch "$name"
+    printf '%s' "$ctx" | jq -r '.windows[]' | while read -r wid; do
+        argenctl window attach "$wid" || true
+    done
+done
+
+# restore the current context
+argenctl context switch "$(jq -r '.contexts[0].name' "$STATE")"
+
+# restore focused window
+focused_id="$(jq -r '.focused_window // empty' "$STATE")"
+[ -n "$focused_id" ] && argenctl window focus "$focused_id" || true
+
+echo "session restored from $STATE"

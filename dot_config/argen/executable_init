@@ -6,6 +6,7 @@ argenctl binding set normal Super+Shift C exec "$0"
 
 # argen restart
 argenctl binding set normal Super+Shift R sh '
+    set -eu
     argen-session-save
     systemctl --user restart argen.service
     sleep 4

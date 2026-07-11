@@ -9,7 +9,7 @@ argenctl binding set normal Super+Shift R sh '
     set -eu
     argen-session-save
     systemctl --user restart argen.service
-    sleep 4
+    sleep 6
     argen-session-restore
 '
 
@@ -17,9 +17,10 @@ argenctl binding set normal Super+Shift R sh '
 argenctl binding set normal Super D exec "fuzzel" "--list-executables-in-path"
 
 # power management
-WAYLOCK="waylock -fork-on-lock -ignore-empty-password -init-color 0xcba6f7"
-argenctl binding set normal Super Escape sh "$WAYLOCK"
-argenctl binding set normal Super+Shift Z sh "$WAYLOCK && systemctl suspend"
+LOCK_CMD="rbw lock; SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent.socket ssh-add -D; waylock -fork-on-lock -ignore-empty-password -init-color 0xcba6f7"
+
+argenctl binding set normal Super Escape sh "$LOCK_CMD"
+argenctl binding set normal Super+Shift Z sh "$LOCK_CMD && systemctl suspend"
 argenctl binding set locked Super+Shift Z exec "systemctl" "suspend"
 for mode in normal locked; do
     argenctl binding set $mode Super+Shift+Control Z exec "systemctl" "poweroff"
@@ -32,8 +33,8 @@ argenctl binding set normal Super K window focus prev
 argenctl binding set normal Super+Shift J window swap next
 argenctl binding set normal Super+Shift K window swap prev
 
-argenctl binding set normal Super F window float
-argenctl binding set normal Super+Shift F window fullscreen
+argenctl binding set normal Super F window fullscreen
+argenctl binding set normal Super W window float
 
 argenctl binding set normal Super X window close
 argenctl binding set normal Super+Shift X window detach
@@ -43,6 +44,18 @@ argenctl binding set normal Super Comma output focus prev
 
 argenctl binding set normal Super+Shift Period window send next
 argenctl binding set normal Super+Shift Comma window send prev
+
+argenctl binding set --repeat normal Super Apostrophe window resize width +40
+argenctl binding set --repeat normal Super Semicolon window resize width -40
+argenctl binding set --repeat normal Super+Shift Apostrophe window resize height +40
+argenctl binding set --repeat normal Super+Shift Semicolon window resize height -40
+
+argenctl binding set normal Super+Shift H window split-or-merge left
+argenctl binding set normal Super+Shift L window split-or-merge right
+
+argenctl binding set normal Super 1 layout switch stacktile
+argenctl binding set normal Super 2 layout switch monocle
+argenctl binding set normal Super 3 layout switch columns
 
 argenctl binding set --repeat normal Super H layout set primary-ratio -0.05
 argenctl binding set --repeat normal Super L layout set primary-ratio +0.05
@@ -209,7 +222,7 @@ restart() {
 }
 
 start way-displays
-restart swayidle -w before-sleep "$WAYLOCK" timeout 300 "$WAYLOCK"
+restart swayidle -w before-sleep "$LOCK_CMD" timeout 180 "$LOCK_CMD"
 restart waybar
 start wlsunset -l 47.6 -L 9.4
 start /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1

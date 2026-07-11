@@ -44,7 +44,6 @@ alias vi="nvim"
 alias sudo="sudo "
 alias mv="mv -i"
 alias cp="cp -i"
-alias tar="bsdtar"
 alias lsblkk="lsblk -o NAME,RM,RO,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS"
 alias wget="wget --hsts-file=$HOME/.local/share/wget/wget-hsts"
 alias ssh="TERM=xterm-256color ssh"
@@ -55,8 +54,8 @@ alias pip="echo 'Disabled. Use \`uv pip\` instead.' && false"
 alias diff="git diff --no-index --"
 
 # functions
-ch() { command chezmoi "$@"; }
-compdef ch=chezmoi
+ch() { command chezmoi "$@"; }; compdef ch=chezmoi
+tar() { command bsdtar "$@"; }; compdef tar=bsdtar
 
 certcheck() {
     command curl -LIv $@ 2>&1 | grep "Server certificate" -A10

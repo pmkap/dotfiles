@@ -8,7 +8,7 @@ Environment=ARGEN_LOG_LEVEL=debug
 ExecStart=/home/pkaplan/.local/bin/argen
 Slice=session.slice
 Restart=always
-RestartSec=1
+RestartSec=2
 StartLimitBurst=5
 StartLimitIntervalSec=30
 KillMode=process

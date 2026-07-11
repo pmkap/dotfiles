@@ -10,6 +10,7 @@ window#waybar {
     min-height: 0;
 }
 
+#custom-argen-mem,
 #temperature,
 #pulseaudio,
 #clock,
@@ -18,6 +19,10 @@ window#waybar {
 #network,
 #battery {
     color: #ffffff;
+}
+
+#custom-argen-mode.normal {
+    color: #000000;
 }
 
 #temperature.warning,
@@ -30,6 +35,7 @@ window#waybar {
 #temperature.critical,
 #cpu.critical,
 #memory.critical,
+#custom-argen-mode.other,
 #battery.critical {
     color: #ff0000;
 }

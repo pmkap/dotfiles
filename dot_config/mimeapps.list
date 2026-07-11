@@ -13,4 +13,5 @@ image/webp=imv.desktop
 image/gif=imv.desktop
 image/bmp=imv.desktop
 image/tiff=imv.desktop
-x-scheme-handler/claude-cli=claude-code-url-handler.desktop
+image/heif=imv.desktop;
+image/heic=imv.desktop;

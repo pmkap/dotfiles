@@ -45,25 +45,22 @@ argenctl binding set normal Super Comma output focus prev
 argenctl binding set normal Super+Shift Period window send next
 argenctl binding set normal Super+Shift Comma window send prev
 
-argenctl binding set --repeat normal Super Apostrophe window resize width +40
-argenctl binding set --repeat normal Super Semicolon window resize width -40
-argenctl binding set --repeat normal Super+Shift Apostrophe window resize height +40
-argenctl binding set --repeat normal Super+Shift Semicolon window resize height -40
-
-argenctl binding set normal Super+Shift H window split-or-merge left
-argenctl binding set normal Super+Shift L window split-or-merge right
-
 argenctl binding set normal Super 1 layout switch stacktile
 argenctl binding set normal Super 2 layout switch monocle
 argenctl binding set normal Super 3 layout switch columns
+argenctl binding set normal Super 4 layout switch scrolling
 
 argenctl binding set --repeat normal Super H layout set primary-ratio -0.05
 argenctl binding set --repeat normal Super L layout set primary-ratio +0.05
 argenctl binding set --repeat normal Super+Control K layout set secondary-ratio -0.05
 argenctl binding set --repeat normal Super+Control J layout set secondary-ratio +0.05
 
+argenctl binding set --repeat normal Super+Shift L layout set --name scrolling offset -100
+argenctl binding set --repeat normal Super+Shift H layout set --name scrolling offset +100
+
 argenctl pointer-binding set normal Super BTN_LEFT move-window
 argenctl pointer-binding set normal Super BTN_RIGHT resize-window
+argenctl pointer-binding set normal Super BTN_MIDDLE scroll
 
 argenctl binding set normal Super+Shift+Control X context close
 
@@ -75,7 +72,7 @@ argenctl rule add float --app-id "Pinentry-gtk"
 argenctl rule add float --app-id "soffice" --title "Text Import - *"
 
 # Create new context and open a browser window
-argenctl binding set normal Super+Alt Return sh "argenctl context new && firefox"
+argenctl binding set normal Super+Alt Return sh "argenctl context new && firefox --new-window suach.ch"
 
 # Switch contexts interactively
 argenctl binding set normal Super Space sh 'argenctl context switch "$(argenctl context list | fuzzel -d)"'

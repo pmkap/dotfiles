@@ -1,0 +1,7 @@
+{
+  "positionX": "right",
+  "positionY": "bottom",
+  "timeout": 5,
+  "timeout-low": 5,
+  "timeout-critical": 5
+}
